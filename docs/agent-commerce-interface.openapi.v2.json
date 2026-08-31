@@ -1,0 +1,905 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bounded Agentic Checkout — Agent Commerce Interface",
+    "version": "2.1.0",
+    "description": "x402 V2 wire-format conformance pass: PAYMENT-REQUIRED / PAYMENT-SIGNATURE / PAYMENT-RESPONSE headers, CAIP-2-shaped network identifiers, GET /agent/v1/discovery, the formal x402 Extensions mechanism (extensions.info/schema), PaymentPayload.accepted (the full chosen PaymentRequirements object — the previous v2.0.0 draft of this spec had this wrong, a real gap found and fixed in this revision, see docs/x402-conformance-diff.md), and 402 (not 404) for payment-settlement failures. Every CatalogItem also carries settlement_type: \"fiat\" directly. This spec is versioned alongside, not overwriting, the frozen Phase 4a/4b v1.0.1 spec at docs/agent-commerce-interface.openapi.json — v1 clients are still served by the same running backend. Full field-by-field reference, the live diff checklist, and the honesty-boundary discussion live in docs/x402-conformance-diff.md, docs/x402-v2-conformance.md, and docs/agent-commerce-catalog-README.md; this file is the current spec's machine-readable shape.\n\nSettlement is processed via Razorpay (India, fiat, test-mode). This is not an onchain settlement network. network values under the inr-fiat: prefix are a documented x402 extension for this deployment, not part of the core x402 network registry."
+  },
+  "paths": {
+    "/agent/v1/register": {
+      "post": {
+        "summary": "Register Buyer Agent",
+        "operationId": "register_buyer_agent_agent_v1_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent/v1/catalog": {
+      "get": {
+        "summary": "Agent Catalog",
+        "operationId": "agent_catalog_agent_v1_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogItem"
+                  },
+                  "type": "array",
+                  "title": "Response Agent Catalog Agent V1 Catalog Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent/v1/product/{product_id}": {
+      "get": {
+        "summary": "Agent Product",
+        "operationId": "agent_product_agent_v1_product__product_id__get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent/v1/discovery": {
+      "get": {
+        "summary": "Agent Discovery",
+        "description": "Phase 11 — no authentication required, mirrors /catalog's openness.\nA real x402 V2 client fetches this BEFORE transacting to learn what\nscheme/network this catalog accepts, including the fiat-settlement\ndisclaimer, without needing this project's own docs. See\ndocs/x402-v2-conformance.md.",
+        "operationId": "agent_discovery_agent_v1_discovery_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent/v1/negotiate": {
+      "post": {
+        "summary": "Agent Negotiate",
+        "operationId": "agent_negotiate_agent_v1_negotiate_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NegotiateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegotiateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent/v1/purchase": {
+      "post": {
+        "summary": "Agent Purchase",
+        "operationId": "agent_purchase_agent_v1_purchase_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "402": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseTermsResponse"
+                }
+              }
+            },
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded JSON PaymentRequired object (x402 V2 wire format). scheme=\"exact\", network=\"inr-fiat:razorpay-test\" (a documented, non-CAIP x402 Extension network id — see extensionDisclaimer on GET /agent/v1/discovery and docs/x402-conformance-diff.md). Carries a formal extensions.{info,schema} block with the same disclaimer, per the spec own Extensions mechanism. Settlement is processed via Razorpay (India, fiat, test-mode). This is not an onchain settlement network. network values under the inr-fiat: prefix are a documented x402 extension for this deployment, not part of the core x402 network registry.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns 402 with the quoted amount in the JSON body (Phase 4a/4b shape, unchanged) AND a PAYMENT-REQUIRED header (x402 V2 wire format). Both describe the same terms_reference/amount — see docs/x402-conformance-diff.md."
+      }
+    },
+    "/agent/v1/pay": {
+      "post": {
+        "summary": "Agent Pay",
+        "operationId": "agent_pay_agent_v1_pay_post",
+        "parameters": [
+          {
+            "name": "PAYMENT-SIGNATURE",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Payment-Signature"
+            },
+            "description": "Base64-encoded JSON PaymentPayload object. REQUIRED fields: accepted (the full PaymentRequirements object being paid with — normally echoed verbatim from PAYMENT-REQUIRED.accepts[0]) and payload.custodialReceipt (terms_reference + approval_token) — this system's non-cryptographic substitute for a signed authorization (see CustodialReceipt in backend/app/agent_commerce/schemas.py). A missing or malformed value, including a missing accepted field, is rejected with 400, never a silent pass-through. See docs/x402-conformance-diff.md."
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayResponse"
+                }
+              }
+            },
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64-encoded JSON SettlementResponse object, present on BOTH success and failure responses from this endpoint (402 on failure, 200 on success — per the spec own 402-for-payment-failure mapping, see docs/x402-conformance-diff.md). settlementType is always \"fiat-custodial\", never \"onchain\". transaction/reference both hold a Razorpay razorpay_order_id (never a razorpay_payment_id/\"pay_...\" string — capture is asynchronous, via webhook, after this response is sent). Settlement is processed via Razorpay (India, fiat, test-mode). This is not an onchain settlement network. network values under the inr-fiat: prefix are a documented x402 extension for this deployment, not part of the core x402 network registry.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or malformed PAYMENT-SIGNATURE header (including a missing required accepted field), or its custodialReceipt does not match the request body's terms_reference/approval_token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment settlement failed — unknown or already-used terms_reference. Uses 402, not 404, per the x402 V2 spec own HTTP status mapping (402 used for both payment-required AND payment-failed scenarios). See docs/x402-conformance-diff.md.",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64-encoded JSON SettlementResponse object, present on BOTH success and failure responses from this endpoint (402 on failure, 200 on success — per the spec own 402-for-payment-failure mapping, see docs/x402-conformance-diff.md). settlementType is always \"fiat-custodial\", never \"onchain\". transaction/reference both hold a Razorpay razorpay_order_id (never a razorpay_payment_id/\"pay_...\" string — capture is asynchronous, via webhook, after this response is sent). Settlement is processed via Razorpay (India, fiat, test-mode). This is not an onchain settlement network. network values under the inr-fiat: prefix are a documented x402 extension for this deployment, not part of the core x402 network registry.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Settles a previously-quoted purchase via Razorpay test-mode. The PAYMENT-SIGNATURE request header is REQUIRED, and must carry a full accepted PaymentRequirements object (not a flattened scheme/network shape — a real conformance gap found and fixed, see docs/x402-conformance-diff.md). A settlement failure returns 402 (not 404). PAYMENT-RESPONSE is always set on the response, success or failure."
+      }
+    },
+    "/agent/v1/order/{order_id}/status": {
+      "get": {
+        "summary": "Agent Order Status",
+        "operationId": "agent_order_status_agent_v1_order__order_id__status_get",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CatalogItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          },
+          "currency": {
+            "type": "string",
+            "const": "INR",
+            "title": "Currency",
+            "default": "INR"
+          },
+          "stock": {
+            "type": "integer",
+            "title": "Stock"
+          },
+          "negotiable": {
+            "type": "boolean",
+            "title": "Negotiable",
+            "default": true
+          },
+          "settlement_type": {
+            "type": "string",
+            "const": "fiat",
+            "title": "Settlement Type",
+            "default": "fiat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "price",
+          "stock"
+        ],
+        "title": "CatalogItem"
+      },
+      "DiscoveryResponse": {
+        "properties": {
+          "x402Version": {
+            "type": "integer",
+            "title": "X402Version",
+            "default": 2
+          },
+          "supportedSchemes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supportedschemes",
+            "default": [
+              "exact"
+            ]
+          },
+          "supportedNetworks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supportednetworks",
+            "default": [
+              "inr-fiat:razorpay-test"
+            ]
+          },
+          "extensionDisclaimer": {
+            "type": "string",
+            "title": "Extensiondisclaimer",
+            "default": "Settlement is processed via Razorpay (India, fiat, test-mode). This is not an onchain settlement network. network values under the inr-fiat: prefix are a documented x402 extension for this deployment, not part of the core x402 network registry."
+          },
+          "catalogUrl": {
+            "type": "string",
+            "title": "Catalogurl",
+            "default": "/agent/v1/catalog"
+          },
+          "negotiateUrl": {
+            "type": "string",
+            "title": "Negotiateurl",
+            "default": "/agent/v1/negotiate"
+          },
+          "purchaseUrl": {
+            "type": "string",
+            "title": "Purchaseurl",
+            "default": "/agent/v1/purchase"
+          },
+          "payUrl": {
+            "type": "string",
+            "title": "Payurl",
+            "default": "/agent/v1/pay"
+          }
+        },
+        "type": "object",
+        "title": "DiscoveryResponse",
+        "description": "GET /agent/v1/discovery — new in Phase 11. No authentication\nrequired, mirrors GET /agent/v1/catalog's openness. A real x402 V2\nclient fetches this BEFORE transacting to learn what this catalog\naccepts, without needing to already know this merchant's docs."
+      },
+      "FinalTerms": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "discount",
+              "bundle"
+            ],
+            "title": "Type"
+          },
+          "value": {
+            "type": "integer",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "FinalTerms"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "NegotiateRequest": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "buyer_agent_id": {
+            "type": "string",
+            "title": "Buyer Agent Id"
+          },
+          "proposed_terms": {
+            "$ref": "#/components/schemas/ProposedTerms"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "quantity",
+          "buyer_agent_id",
+          "proposed_terms"
+        ],
+        "title": "NegotiateRequest"
+      },
+      "NegotiateResponse": {
+        "properties": {
+          "approved": {
+            "type": "boolean",
+            "title": "Approved"
+          },
+          "approval_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Token"
+          },
+          "final_terms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinalTerms"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "max_allowed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Allowed"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "approved"
+        ],
+        "title": "NegotiateResponse"
+      },
+      "OrderStatusResponse": {
+        "properties": {
+          "order_id": {
+            "type": "integer",
+            "title": "Order Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "razorpay_order_id": {
+            "type": "string",
+            "title": "Razorpay Order Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "status",
+          "amount",
+          "razorpay_order_id"
+        ],
+        "title": "OrderStatusResponse"
+      },
+      "PayRequest": {
+        "properties": {
+          "terms_reference": {
+            "type": "string",
+            "title": "Terms Reference"
+          },
+          "approval_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Token"
+          },
+          "buyer_agent_id": {
+            "type": "string",
+            "title": "Buyer Agent Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "terms_reference",
+          "buyer_agent_id"
+        ],
+        "title": "PayRequest"
+      },
+      "PayResponse": {
+        "properties": {
+          "order_id": {
+            "type": "integer",
+            "title": "Order Id"
+          },
+          "razorpay_order_id": {
+            "type": "string",
+            "title": "Razorpay Order Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "razorpay_order_id",
+          "status",
+          "amount"
+        ],
+        "title": "PayResponse"
+      },
+      "ProposedTerms": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "discount",
+              "bundle"
+            ],
+            "title": "Type"
+          },
+          "value": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "ProposedTerms"
+      },
+      "PurchaseRequest": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "buyer_agent_id": {
+            "type": "string",
+            "title": "Buyer Agent Id"
+          },
+          "approval_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "quantity",
+          "buyer_agent_id"
+        ],
+        "title": "PurchaseRequest"
+      },
+      "PurchaseTermsResponse": {
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "const": "INR",
+            "title": "Currency",
+            "default": "INR"
+          },
+          "accepted_payment_methods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Accepted Payment Methods",
+            "default": [
+              "razorpay_order"
+            ]
+          },
+          "payment_endpoint": {
+            "type": "string",
+            "title": "Payment Endpoint",
+            "default": "/agent/v1/pay"
+          },
+          "terms_reference": {
+            "type": "string",
+            "title": "Terms Reference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "terms_reference"
+        ],
+        "title": "PurchaseTermsResponse"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "buyer_agent_id": {
+            "type": "string",
+            "title": "Buyer Agent Id"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "buyer_agent_id"
+        ],
+        "title": "RegisterRequest"
+      },
+      "RegisterResponse": {
+        "properties": {
+          "buyer_agent_id": {
+            "type": "string",
+            "title": "Buyer Agent Id"
+          },
+          "api_key": {
+            "type": "string",
+            "title": "Api Key"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "buyer_agent_id",
+          "api_key",
+          "created_at"
+        ],
+        "title": "RegisterResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1440" height="980" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="720" y="38" text-anchor="middle" font-size="24" font-weight="700" fill="#0f172a">Bounded Agentic Checkout Platform — Architecture</text>
+  <text x="720" y="60" text-anchor="middle" font-size="13" fill="#64748b">Deterministic where it matters. LLM-driven only where framing/negotiation genuinely needs judgment.</text>
+
+  <!-- Legend -->
+  <g transform="translate(980,78)">
+    <rect x="0" y="0" width="430" height="66" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="14" y="14" width="28" height="18" rx="3" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+    <text x="50" y="27" font-size="12" fill="#334155">Deterministic (code/rules, no LLM in the decision)</text>
+    <rect x="14" y="38" width="28" height="18" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="50" y="51" font-size="12" fill="#334155">LLM-driven (framing / natural-language reasoning)</text>
+  </g>
+
+  <!-- ================= STOREFRONT / DASHBOARD (frontend) ================= -->
+  <g transform="translate(60,110)">
+    <rect x="0" y="0" width="480" height="130" rx="10" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+    <text x="16" y="24" font-size="15" font-weight="700" fill="#0f172a">Frontend (React + Vite)</text>
+    <rect x="16" y="36" width="200" height="76" rx="6" fill="#ffffff" stroke="#334155"/>
+    <text x="116" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Storefront</text>
+    <text x="116" y="76" text-anchor="middle" font-size="10" fill="#475569">Catalog, cart,</text>
+    <text x="116" y="90" text-anchor="middle" font-size="10" fill="#475569">cart-abandonment</text>
+    <text x="116" y="104" text-anchor="middle" font-size="10" fill="#475569">timer + voice popup</text>
+
+    <rect x="232" y="36" width="232" height="76" rx="6" fill="#ffffff" stroke="#334155"/>
+    <text x="348" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Merchant Dashboard</text>
+    <text x="348" y="76" text-anchor="middle" font-size="10" fill="#475569">Sales, negotiations, agent chat,</text>
+    <text x="348" y="90" text-anchor="middle" font-size="10" fill="#475569">Security Posture, Recovery-Sim</text>
+    <text x="348" y="104" text-anchor="middle" font-size="10" fill="#475569">cards — all read-only views</text>
+  </g>
+
+  <!-- ================= BACKEND container ================= -->
+  <g transform="translate(60,300)">
+    <rect x="0" y="0" width="740" height="420" rx="10" fill="#f1f5f9" stroke="#0f172a" stroke-width="2.5"/>
+    <text x="16" y="26" font-size="16" font-weight="700" fill="#0f172a">Backend (FastAPI, one process)</text>
+
+    <!-- Deterministic core -->
+    <rect x="16" y="40" width="330" height="150" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+    <text x="32" y="62" font-size="13" font-weight="700" fill="#0f172a">Deterministic core</text>
+    <text x="32" y="82" font-size="10.5" fill="#334155">/order/create, /agent/v1/purchase+pay</text>
+    <text x="32" y="98" font-size="10.5" fill="#334155">create_order_with_optional_discount()</text>
+    <text x="32" y="114" font-size="10.5" fill="#334155">gate_client.py — HTTP only, fails CLOSED</text>
+    <text x="32" y="130" font-size="10.5" fill="#334155">audit.py — hash-chained audit log</text>
+    <text x="32" y="146" font-size="10.5" fill="#334155">x402 V2 headers (PAYMENT-*)</text>
+    <text x="32" y="162" font-size="10.5" fill="#334155">discount_ladder.py (5% → 10% → hold)</text>
+    <text x="32" y="178" font-size="10.5" fill="#7c3aed" font-weight="600">rung % is fixed by code, gate has final say</text>
+
+    <!-- Seller agent (LLM) -->
+    <rect x="366" y="40" width="358" height="150" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="382" y="62" font-size="13" font-weight="700" fill="#4c1e9e">Seller negotiation agent (LangGraph)</text>
+    <text x="382" y="82" font-size="10.5" fill="#4c1e9e">decide_to_offer → propose_offer → handle_response</text>
+    <text x="382" y="98" font-size="10.5" fill="#4c1e9e">Groq → Groq(2) → Gemini fallback chain</text>
+    <text x="382" y="114" font-size="10.5" fill="#4c1e9e">Chooses FRAMING + shape (discount/bundle)</text>
+    <text x="382" y="130" font-size="10.5" fill="#4c1e9e">customer_mindset_summary (best-effort)</text>
+    <text x="382" y="146" font-size="10.5" fill="#4c1e9e">agent_negotiation_message (chat framing)</text>
+    <text x="382" y="166" font-size="10.5" font-weight="700" fill="#b91c1c">NEVER decides the real approved/₹ amount —</text>
+    <text x="382" y="180" font-size="10.5" font-weight="700" fill="#b91c1c">every offer still goes through the gate below.</text>
+
+    <!-- Order/Audit DB -->
+    <rect x="16" y="206" width="330" height="60" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+    <text x="32" y="228" font-size="12" font-weight="700" fill="#0f172a">SQLite — orders, audit_log, buyer_agents</text>
+    <text x="32" y="246" font-size="10" fill="#475569">Hash-chained audit trail; every money action logged</text>
+    <text x="32" y="258" font-size="10" fill="#475569">(gate_call → gate_decision → order_created)</text>
+
+    <!-- Dashboard SSE endpoint -->
+    <rect x="366" y="206" width="358" height="60" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+    <text x="382" y="228" font-size="12" font-weight="700" fill="#0f172a">/dashboard/stream (SSE)</text>
+    <text x="382" y="246" font-size="10" fill="#475569">Polls audit_log every ~1.5s, pushes new events</text>
+    <text x="382" y="258" font-size="10" fill="#475569">to any connected dashboard client</text>
+
+    <!-- Human-negotiation session lock -->
+    <rect x="16" y="286" width="708" height="46" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="1.5"/>
+    <text x="32" y="308" font-size="11" fill="#9a3412">Per-session lock (routes/negotiation.py) — serializes concurrent</text>
+    <text x="32" y="322" font-size="11" fill="#9a3412">/negotiate/message calls for the SAME session_id (red-team-confirmed fix)</text>
+
+    <!-- Agent-commerce public interface -->
+    <rect x="16" y="346" width="708" height="60" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="32" y="368" font-size="12" font-weight="700" fill="#1e3a8a">Agent-Commerce Interface — /agent/v1/* (the ONLY door for buyer-agent)</text>
+    <text x="32" y="386" font-size="10.5" fill="#1e3a8a">/register /catalog /discovery /negotiate /purchase /pay — x402 V2 wire format, fiat-custodial settlement</text>
+  </g>
+
+  <!-- ================= POLICY GATE (separate service) ================= -->
+  <g transform="translate(860,300)">
+    <rect x="0" y="0" width="260" height="200" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="2.5"/>
+    <text x="130" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#7f1d1d">Policy Gate</text>
+    <text x="130" y="44" text-anchor="middle" font-size="10.5" fill="#7f1d1d">SEPARATE PROCESS — own venv, own DB</text>
+    <rect x="16" y="56" width="228" height="128" rx="6" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="30" y="76" font-size="11" font-weight="700" fill="#0f172a">merchant_rules.py</text>
+    <text x="30" y="92" font-size="10" fill="#334155">Plain Python config — per-product</text>
+    <text x="30" y="105" font-size="10" fill="#334155">max_discount_pct, MAX_ATTEMPTS</text>
+    <text x="30" y="126" font-size="11" font-weight="700" fill="#0f172a">/evaluate, /verify</text>
+    <text x="30" y="142" font-size="10" fill="#334155">Atomic UPDATE...WHERE used=0</text>
+    <text x="30" y="155" font-size="10" fill="#334155">(single-use token claim, no race)</text>
+    <text x="30" y="171" font-size="10" fill="#b91c1c" font-weight="600">100% deterministic — zero LLM calls</text>
+  </g>
+
+  <!-- ================= RAZORPAY ================= -->
+  <g transform="translate(860,540)">
+    <rect x="0" y="0" width="260" height="110" rx="10" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+    <text x="130" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Razorpay (test-mode)</text>
+    <text x="130" y="48" text-anchor="middle" font-size="10.5" fill="#14532d">order.create · webhook (payment.captured/failed)</text>
+    <text x="130" y="66" text-anchor="middle" font-size="10.5" fill="#14532d">Real fiat rail — INR, no crypto/on-chain step</text>
+    <text x="130" y="88" text-anchor="middle" font-size="9.5" fill="#166534" font-style="italic">settlementType: "fiat-custodial", never "onchain"</text>
+  </g>
+
+  <!-- ================= BUYER AGENT — genuinely isolated ================= -->
+  <g transform="translate(1160,300)">
+    <rect x="0" y="0" width="260" height="420" rx="10" fill="#fef9c3" stroke="#a16207" stroke-width="2.5" stroke-dasharray="8,5"/>
+    <text x="130" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#713f12">Buyer Agent</text>
+    <text x="130" y="44" text-anchor="middle" font-size="10" fill="#713f12">OWN venv · OWN process</text>
+    <text x="130" y="58" text-anchor="middle" font-size="10" fill="#713f12">ZERO imports from backend</text>
+    <rect x="16" y="70" width="228" height="150" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="30" y="90" font-size="11" font-weight="700" fill="#4c1e9e">LangGraph shopper graph</text>
+    <text x="30" y="108" font-size="10" fill="#4c1e9e">evaluate → negotiate_round →</text>
+    <text x="30" y="122" font-size="10" fill="#4c1e9e">await_*_checkpoint → purchase</text>
+    <text x="30" y="140" font-size="10" fill="#4c1e9e">LLM picks product + writes its</text>
+    <text x="30" y="154" font-size="10" fill="#4c1e9e">own chat message + target_budget</text>
+    <text x="30" y="172" font-size="10" fill="#4c1e9e">extraction — framing only</text>
+    <text x="30" y="196" font-size="10" font-weight="700" fill="#b91c1c">Discount ladder VALUE is deterministic</text>
+    <text x="30" y="210" font-size="10" font-weight="700" fill="#b91c1c">(app/graph/discount_ladder.py, own copy)</text>
+
+    <rect x="16" y="232" width="228" height="70" rx="6" fill="#ffffff" stroke="#a16207"/>
+    <text x="30" y="252" font-size="11" font-weight="700" fill="#0f172a">client.py / x402_headers.py</text>
+    <text x="30" y="268" font-size="10" fill="#475569">Independently re-derived from the</text>
+    <text x="30" y="282" font-size="10" fill="#475569">PUBLIC docs — not the backend's code</text>
+    <text x="30" y="296" font-size="10" fill="#475569">Sends PAYMENT-SIGNATURE (own copy)</text>
+
+    <rect x="16" y="316" width="228" height="88" rx="6" fill="#fff7ed" stroke="#c2410c"/>
+    <text x="30" y="336" font-size="10.5" font-weight="700" fill="#9a3412">Two human-in-the-loop checkpoints:</text>
+    <text x="30" y="352" font-size="10" fill="#9a3412">await_negotiate_checkpoint</text>
+    <text x="30" y="366" font-size="10" fill="#9a3412">await_purchase_confirmation</text>
+    <text x="30" y="384" font-size="10" fill="#9a3412">POST /shopper/chat — a person</text>
+    <text x="30" y="397" font-size="10" fill="#9a3412">approves each real spend</text>
+  </g>
+
+  <!-- ============= ARROWS ============= -->
+  <!-- storefront -> backend -->
+  <line x1="300" y1="240" x2="300" y2="300" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="310" y="272" font-size="10" fill="#334155">HTTPS REST</text>
+
+  <!-- backend -> dashboard (SSE) -->
+  <path d="M 480 300 C 480 260 400 250 300 240" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+  <text x="360" y="255" font-size="9.5" fill="#1d4ed8">SSE (live)</text>
+
+  <!-- backend -> policy gate -->
+  <line x1="800" y1="400" x2="860" y2="400" stroke="#b91c1c" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+  <text x="795" y="390" text-anchor="end" font-size="10" fill="#7f1d1d">HTTP only</text>
+  <text x="795" y="415" text-anchor="end" font-size="9.5" fill="#7f1d1d">fails closed if down</text>
+
+  <!-- backend -> razorpay -->
+  <path d="M 800 500 C 830 540 830 560 860 590" fill="none" stroke="#15803d" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="805" y="545" font-size="9.5" fill="#15803d">order.create</text>
+
+  <!-- razorpay -> backend (webhook) -->
+  <path d="M 860 610 C 830 610 810 560 800 520" fill="none" stroke="#15803d" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="805" y="600" font-size="9.5" fill="#15803d">webhook</text>
+
+  <!-- buyer agent -> agent-commerce interface ONLY -->
+  <line x1="1160" y1="676" x2="784" y2="676" stroke="#a16207" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="970" y="668" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">HTTPS — /agent/v1/* ONLY</text>
+  <text x="970" y="694" text-anchor="middle" font-size="9.5" fill="#713f12" font-style="italic">no arrow into policy gate, DB, or seller agent internals</text>
+
+  <!-- Footer note -->
+  <g transform="translate(60,750)">
+    <rect x="0" y="0" width="1360" height="200" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="20" y="26" font-size="13.5" font-weight="700" fill="#0f172a">Independent, HTTP-only test/verification tooling (each its own venv — not part of the runtime path above)</text>
+
+    <rect x="20" y="40" width="320" height="80" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="34" y="60" font-size="11" font-weight="700" fill="#0f172a">redteam/ + red-team-agent/</text>
+    <text x="34" y="76" font-size="10" fill="#475569">5 attack categories vs. this system's own</text>
+    <text x="34" y="90" font-size="10" fill="#475569">running services — found &amp; fixed 5 real bugs,</text>
+    <text x="34" y="104" font-size="10" fill="#475569">3 open findings reported honestly (WHAT_BROKE.md)</text>
+
+    <rect x="360" y="40" width="320" height="80" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="374" y="60" font-size="11" font-weight="700" fill="#0f172a">metrics/recovery_sim.py</text>
+    <text x="374" y="76" font-size="10" fill="#475569">Drives the REAL negotiation flow with a</text>
+    <text x="374" y="90" font-size="10" fill="#475569">simulated (disclosed) shopper-acceptance</text>
+    <text x="374" y="104" font-size="10" fill="#475569">model — feeds the dashboard's recovery card</text>
+
+    <rect x="700" y="40" width="320" height="80" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="714" y="60" font-size="11" font-weight="700" fill="#0f172a">redteam/x402_conformance_test.py</text>
+    <text x="714" y="76" font-size="10" fill="#475569">23 individual pass/fail checks against the</text>
+    <text x="714" y="90" font-size="10" fill="#475569">real x402 V2 spec — not a single aggregate</text>
+    <text x="714" y="104" font-size="10" fill="#475569">pass/fail (docs/x402-conformance-diff.md)</text>
+
+    <rect x="1040" y="40" width="300" height="80" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="1054" y="60" font-size="11" font-weight="700" fill="#0f172a">demo/failure_beats/</text>
+    <text x="1054" y="76" font-size="10" fill="#475569">Two rehearsed, &lt;15s scripted demo beats:</text>
+    <text x="1054" y="90" font-size="10" fill="#475569">ceiling rejection, and policy-gate-down</text>
+    <text x="1054" y="104" font-size="10" fill="#475569">fail-safe + clean recovery</text>
+
+    <text x="20" y="146" font-size="11" fill="#64748b">Key architectural decision, made visible above rather than only stated in prose: the policy gate is</text>
+    <text x="20" y="164" font-size="11" fill="#64748b">a genuinely separate process with zero LLM calls in its own code path — every LLM-driven box (seller agent,</text>
+    <text x="20" y="182" font-size="11" fill="#64748b">buyer agent's own graph) can only ever PROPOSE terms; the gate is what actually decides approved/₹, every time, no exceptions.</text>
+  </g>
+</svg>

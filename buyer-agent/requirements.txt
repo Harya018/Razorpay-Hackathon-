@@ -1,0 +1,10 @@
+langgraph>=1.2
+langchain-core>=0.3
+openai>=1.40
+requests>=2.31
+python-dotenv>=1.0
+pydantic>=2.9
+# Phase 10, Part C — the new interactive /shopper/* HTTP interface (the
+# CLI, app/main.py, needs none of this and still runs standalone).
+fastapi>=0.115
+uvicorn>=0.30
