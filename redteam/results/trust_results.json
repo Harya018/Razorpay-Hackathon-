@@ -1,0 +1,41 @@
+[
+  {
+    "attack_id": "trust_boundary.forged_approval_response",
+    "description": "Constructs a 64-lowercase-hex-character string matching policy-gate's real approval_token shape exactly, but never actually issued by /evaluate — presents it at POST /order/create, bypassing any real negotiation. Asserts the backend trusts an independently-verified record, not the token's shape or a mimicked 'approved' response.",
+    "requests_sent": 1,
+    "expected_successes": 0,
+    "actual_successes": 0,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "HTTP 200: {\"razorpay_order_id\":\"order_TVE5uCsd74EuoV\",\"amount\":29900,\"key_id\":\"rzp_test_TTWIKLPbwplPGG\"}. Order charged the full listed price — a token that merely LOOKS real (correct length, correct hex alphabet, matching policy-gate's real sha256-hexdigest shape) was still rejected, because policy-gate's /verify does an actual `SELECT ... WHERE approval_token = ?` lookup against its own database, not a shape/format check. Structural plausibility alone buys an attacker nothing here — the backend never trusts the RESPONSE's shape, only an independently-verified real record.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:41:31.502705+00:00"
+  },
+  {
+    "attack_id": "trust_boundary.stale_state_mismatch",
+    "description": "Explicitly OUT OF SCOPE as literally specified (approve a discount, change the merchant's policy limits, redeem the now-stale token) — merchant_rules.py has no HTTP-reachable mutation path, and changing it isn't an attacker action in the first place. Tests the scenario's own suggested alternative instead: whether tokens are time-bound at all.",
+    "requests_sent": 1,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": false,
+    "verdict": "PASS",
+    "notes": "OUT OF SCOPE for the 'change policy limits, then redeem a now-stale token' scenario as literally described — see this function's docstring for the concrete reason (merchant_rules.py is static Python config, not reachable or mutable via any HTTP endpoint this suite could call; a merchant changing their own limits also isn't an attacker action, so it doesn't fit this suite's own threat model either). Testing what's actually possible and in-scope instead, per this scenario's own suggested alternative framing: waited 30s after minting a real token before redeeming it — still honored (HTTP 402, terms_reference=d1a6fd1d-ac06-40d1-887b-2f64453de8ff). CONFIRMED (as expected, matching this project's own documented limitation): tokens are not time-bound at all — policy-gate/app/routes/evaluate.py's verify() has no created_at/expiry check anywhere in its logic. A genuinely stale-state scenario (minutes to hours between negotiation and redemption, during which a merchant might reasonably change their limits) would be honored exactly the same as an immediate redemption. This is a real, live-confirmed property, not assumed from reading the code alone — but it is a PRE-EXISTING, documented limitation (docs/agent-commerce-interface.md's 'Known limitation — token freshness'), not a fresh gap discovered by this test.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:42:04.034965+00:00"
+  },
+  {
+    "attack_id": "trust_boundary.policy_gate_unreachable",
+    "description": "Stops the REAL policy-gate process (not a mock), then: (1) attempts a new /agent/v1/negotiate call, asserting it comes back approved=False with a reason mentioning the gate being unreachable, and (2) attempts /order/create with a token that cannot possibly be verified right now, asserting it still only ever charges the full listed price. Restarts policy-gate afterward either way.",
+    "requests_sent": 2,
+    "expected_successes": 0,
+    "actual_successes": 0,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "Killed policy-gate process(es): 37804\n22328. Kill -> attempt -> observe-graceful-rejection took 11.9s (the part meant to be shown live, target <15s). Policy-gate confirmed down: True. Negotiate failed CLOSED (approved=False, reason mentions gate_unreachable): True (actual: {'approved': False, 'approval_token': None, 'final_terms': None, 'reason': 'gate_unreachable: HTTPConnectionPool(host=\\'localhost\\', port=8001): Max retries exceeded with url: /evaluate (Caused by NewConnectionError(\"HTTPConnection(host=\\'localhost\\', port=8001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))', 'max_allowed': None, 'message': None}). Checkout with an unverifiable token still charged full price only: True (actual: HTTP 200, amount=29900). Policy-gate restart took a further 7.3s (NOT part of the live-demo timing — this dev environment's uvicorn startup latency is a known, unrelated characteristic of this OneDrive-synced project path) and succeeded — later attack modules can proceed normally.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:42:23.843077+00:00"
+  }
+]

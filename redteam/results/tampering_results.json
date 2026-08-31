@@ -1,0 +1,54 @@
+[
+  {
+    "attack_id": "tampering.direct_discount_injection",
+    "description": "Calls POST /order/create directly with (a) extra discount-shaped JSON fields smuggled into the body, and (b) a fabricated approval_token — both bypassing the negotiation conversation entirely — asserts the policy gate's real record, not the request's shape, decides the charged amount.",
+    "requests_sent": 2,
+    "expected_successes": 0,
+    "actual_successes": 0,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "(a) extra crafted fields (discount=99999, discount_pct=90, amount=100, override_price=1, is_admin=True) alongside a normal request: HTTP 200, amount charged=249900. (b) fabricated approval_token (never issued): HTTP 200, amount charged=249900. Every money action stayed EXPLAINABLE and BOUNDED: both attempts to inject a discount by skipping the negotiation conversation entirely resulted in the full listed price being charged, never the smuggled/fabricated figure — extra JSON fields are silently dropped by Pydantic's schema (which has no discount field to smuggle a value into in the first place), and the fabricated token failed policy-gate's real DB lookup in /verify.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:35:22.459341+00:00"
+  },
+  {
+    "attack_id": "tampering.negative_or_overflow_values",
+    "description": "Sends a negative discount value (a markup disguised as a discount), a value exceeding the total original price (>100% off), and an integer-overflow-sized value to POST /agent/v1/negotiate — asserts clean validation errors or clean gate rejections, never a 500 or a silently accepted value.",
+    "requests_sent": 3,
+    "expected_successes": 0,
+    "actual_successes": 0,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "negative discount (markup disguised as a discount) (value=-50000): HTTP 422 — {\"detail\":[{\"type\":\"greater_than\",\"loc\":[\"body\",\"proposed_terms\",\"value\"],\"msg\":\"Input should be greater than 0\",\"input\":-50000,\"ctx\":{\"gt\":0}}]} [CLEAN]\ndiscount >100% (value exceeds total original price) (value=249901): HTTP 200 — {\"approved\":false,\"approval_token\":null,\"final_terms\":null,\"reason\":\"discount_value_exceeds_original_price\",\"max_allowed\":null,\"message\":null} [CLEAN]\ninteger overflow-sized value (value=1000000000000000000): HTTP 200 — {\"approved\":false,\"approval_token\":null,\"final_terms\":null,\"reason\":\"discount_value_exceeds_original_price\",\"max_allowed\":null,\"message\":null} [CLEAN]\n\nEvery boundary value was bounded and gated cleanly — never a 500, never silently accepted as a valid discount, whether caught at the Pydantic validation layer or the policy gate's own arithmetic.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:35:26.776071+00:00"
+  },
+  {
+    "attack_id": "tampering.missing_approval_token",
+    "description": "Calls POST /order/create with approval_token omitted entirely — checks the real invariant ('no token, no discount, ever') rather than the brief's literal 'must be rejected,' which doesn't fit a system that deliberately allows un-negotiated full-price checkout.",
+    "requests_sent": 1,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "HTTP 200: {\"razorpay_order_id\":\"order_TVDzUFuLUoSA3I\",\"amount\":249900,\"key_id\":\"rzp_test_TTWIKLPbwplPGG\"}. Order finalized at the full, explainable, listed price with no token presented at all — correct: an un-negotiated checkout is a normal, intended path in this system (bounded to the listed price, gated by the mere absence of any discount claim), not something that should be refused outright. Reframed from the literal 'assert rejection' ask, which would be the wrong requirement for a system that deliberately supports full-price checkout without negotiation.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:35:26.940019+00:00"
+  },
+  {
+    "attack_id": "tampering.session_id_substitution",
+    "description": "Negotiates and obtains an approved token in session A, then presents that SAME token at POST /order/create claiming session B's context (a completely separate negotiation) — checks whether a human-negotiated token is scoped to the session that earned it, beyond mere single-use and product/quantity matching.",
+    "requests_sent": 1,
+    "expected_successes": 0,
+    "actual_successes": 0,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "session_a=769b46cf-7f5c-41d3-b791-45c657c87bef, session_b=9cc32580-e049-4b73-b2cf-ac69756c8988, approval_token=7bb6fb6ec47d84d0bbae507f7e7175ea4dff1da56eb9669654eaee7112ad5d50, session_a's negotiated checkout_amount=237405. Checkout attempt presenting session_a's token while claiming session_b's context (session_id=9cc32580-e049-4b73-b2cf-ac69756c8988): HTTP 200 — {\"razorpay_order_id\":\"order_TVDziqsPtcw65g\",\"amount\":249900,\"key_id\":\"rzp_test_TTWIKLPbwplPGG\"}. Session A's token was rejected when presented under session B's context — policy-gate's /verify now checks the caller-supplied session_id against the Approval's own recorded session_id (reason='session_mismatch' when they differ). FIX APPLIED (found and closed in this same pass, not left as an open finding): ORIGINAL RESULT (before the fix): FAIL — session A's approval_token was honored for session B's checkout with no error at all, because /verify only ever checked product_id/cart_quantity/requester_id, never session_id (requester_id is NULL for the human channel, so that earlier Phase 8 fix never covered this channel). ROOT CAUSE: OrderCreateRequest had no session_id field at all, so the human checkout endpoint had no way to even ask which session a token was being redeemed for. FIX: added an optional session_id to OrderCreateRequest and VerifyRequest, threaded through gate_client.verify_token() to policy-gate's /verify, enforced only when the CALLER supplies it (backward compatible — a caller that doesn't send session_id sees zero behavior change, same opt-in rollout shape as the original requester_id fix). The frontend (NegotiationPanel.jsx via lib/checkout.js) was updated to actually send its own negotiation's session_id on the negotiated-handoff checkout path, so real users are covered too, not just a red-team script that knows to send the field.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T14:35:40.304603+00:00"
+  }
+]

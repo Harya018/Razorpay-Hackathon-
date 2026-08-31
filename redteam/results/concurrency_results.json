@@ -1,0 +1,41 @@
+[
+  {
+    "attack_id": "concurrency.discount_ceiling_race",
+    "description": "Fires 10 concurrent POST /negotiate/message calls against ONE human-negotiation session, each demanding the maximum discount — asserts the session's own attempt cap and gate-approval count (read from its audit trail, not response text) never exceed the merchant's documented ceiling (3 attempts), i.e. no two of the ten each land an independent 'maximum discount' as if the others never happened.",
+    "requests_sent": 10,
+    "expected_successes": 3,
+    "actual_successes": 3,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "session_id=9483b587-ee2a-4f1b-82be-f7fac0c9aa0d. HTTP status codes: [200, 200, 200, 400, 400, 400, 400, 400, 400, 400] (0 client-side exceptions: []). Audit trail: max attempt_number reached=3 (cap=3), gate_decision(approved=True) count=3. The attempt cap held under 10-way concurrent pressure on a single session — the per-session negotiation lock (backend/app/routes/negotiation.py's _lock_for_session, added after an earlier same-session race was found and fixed) serializes concurrent resumes, and the graph's own turn_count >= MAX_OFFER_ATTEMPTS check stops any call past the 3rd legitimate attempt from reaching the gate at all.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:24:28.050683+00:00"
+  },
+  {
+    "attack_id": "concurrency.approval_token_race",
+    "description": "Obtains one real, single-use approval_token and terms_reference, then fires 10 concurrent POST /agent/v1/pay redemptions of the IDENTICAL token+terms_reference — asserts exactly 1 succeeds and the rest are cleanly rejected, not silently duplicated.",
+    "requests_sent": 10,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "terms_reference=8566ec4e-b0c7-4105-ab25-cfd801af586e. Exactly 1/10 concurrent redemptions succeeded (status codes: [200, 402, 402, 402, 402, 402, 402, 402, 402, 402]); the rest were cleanly rejected (this system's equivalent of 'token already used' is a 402 'unknown_or_already_used_terms_reference', backed by an atomic UPDATE ... WHERE used=0 claim on PurchaseIntent, not a silent duplicate success).",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:24:37.453765+00:00"
+  },
+  {
+    "attack_id": "concurrency.same_session_double_negotiation",
+    "description": "Fires 2 concurrent POST /negotiate/start calls for the identical cart (product_id, cart_quantity) before either completes — asserts the system doesn't create two divergent negotiation states for what should be one shopper's cart.",
+    "requests_sent": 2,
+    "expected_successes": 1,
+    "actual_successes": 2,
+    "blocked": false,
+    "verdict": "FAIL",
+    "notes": "HTTP 200, 200. session_ids returned: ['68ff2037-ba86-4e80-8e75-0f7c9d029398', '38aad4a7-9d28-4b4e-a6a2-0f2fd28d8e08'] (2 distinct). CONFIRMED: two independent, fully-live negotiation sessions were created for the identical cart (product_id, cart_quantity) from two concurrent /negotiate/start calls — two divergent negotiation states for what a shopper would consider one cart. ROOT CAUSE (not a check-then-write race — a missing idempotency key): NegotiateStartRequest (backend/app/schemas/negotiation.py) has no client-supplied cart/session identity field at all, only product_id + cart_quantity, which are NOT unique (a shopper can legitimately open two separate negotiations for the same product on purpose) — so there is no natural column for a unique constraint or INSERT ... ON CONFLICT DO NOTHING to key on today; that fix shape doesn't apply as-is. This project's own frontend (frontend/src/hooks/useCartAbandonment.js) already works around exactly this by holding a module-level _negotiateStartInFlight guard before ever calling /negotiate/start — but that only protects ONE browser tab's own call site, not this endpoint against two independent callers (a red-team script, or two tabs). PROPOSED MINIMAL FIX (not applied here, per this phase's instruction to report separately from fixing): add an optional client-supplied idempotency key (e.g. `cart_id: str | None`) to NegotiateStartRequest; when present, look up an existing live session for that key before minting a new one (INSERT ... ON CONFLICT DO NOTHING against a new unique (cart_id) column would then apply cleanly). This is a real, if small, API contract change — not a one-line DB constraint on the CURRENT schema — so it's flagged here as a finding + proposal, not silently patched in this attack module.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:23:39.899190+00:00"
+  }
+]

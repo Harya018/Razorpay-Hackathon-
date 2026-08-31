@@ -1,0 +1,62 @@
+[
+  {
+    "attack_id": "concurrent_race.0",
+    "module": "concurrent_race",
+    "name": "Experiment A \u2014 same terms_reference, same approval_token, 20-way concurrent /pay",
+    "description": "Negotiates one valid discount, gets one terms_reference from /purchase, then fires 20 simultaneous POST /agent/v1/pay calls with that SAME terms_reference and approval_token.",
+    "requests_sent": 20,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": true,
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "verdict": "PASS",
+    "notes": "1/20 concurrent /pay calls with the IDENTICAL terms_reference succeeded (HTTP 200). Order ids created: [103]. Exactly one succeeded, as a correct single-use terms_reference must \u2014 the rest correctly got 404. Note: this PASSED on every run, including before the Experiment B fix below \u2014 but the identical read-then-write anti-pattern was present in backend's PurchaseIntent.used check too, and was hardened with the same atomic-UPDATE fix regardless, since a pass here likely reflects SQLite's incidental file-level locking rather than an explicit, reliable guarantee.",
+    "timestamp": "2026-08-28T12:54:29.296026+00:00"
+  },
+  {
+    "attack_id": "concurrent_race.1",
+    "module": "concurrent_race",
+    "name": "Experiment B \u2014 same approval_token, two different terms_references, concurrent /pay",
+    "description": "Negotiates one valid discount, then creates TWO separate, legitimate terms_references via two /purchase calls (same product/qty) \u2014 isolating the policy-gate's own Approval.used check from the backend's PurchaseIntent.used check, since each terms_reference is individually valid and unused going into this test.",
+    "requests_sent": 2,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": true,
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "verdict": "PASS",
+    "notes": "2/2 concurrent /pay calls (different terms_reference, SAME approval_token) succeeded. Order ids: [105, 104]. Orders actually charged the discounted amount (\u20b9269.10): 1. At most one order got the discount, as a single-use approval_token must \u2014 the gate's Approval.used check held under concurrency here.",
+    "timestamp": "2026-08-28T12:54:29.296026+00:00"
+  },
+  {
+    "attack_id": "concurrent_race.2",
+    "module": "concurrent_race",
+    "name": "Agent-channel floor-price race \u2014 N identical /negotiate calls at exactly the floor price",
+    "description": "Fires 10 concurrent POST /agent/v1/negotiate calls, all proposing exactly product 2's floor price (\u20b9254.15, from its 15.0% default cap). This is a reframing of the brief's 'discount ceiling race' \u2014 see notes for why an aggregate ceiling doesn't apply to this deliberately stateless, per-call endpoint.",
+    "requests_sent": 10,
+    "expected_successes": 10,
+    "actual_successes": 10,
+    "blocked": true,
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "verdict": "PASS",
+    "notes": "All 10 concurrent calls independently approved at exactly the floor value (\u20b9254.15) \u2014 no race in the gate's per-request arithmetic. Each negotiate call creates its own Approval row (see policy-gate/app/routes/evaluate.py), so N legitimate, independently-floor-priced offers is the CORRECT outcome, not a shared ceiling being exceeded.",
+    "timestamp": "2026-08-28T12:54:29.296026+00:00"
+  },
+  {
+    "attack_id": "concurrent_race.3",
+    "module": "concurrent_race",
+    "name": "Same-session double negotiation \u2014 2 concurrent POST /negotiate/message for one session_id",
+    "description": "Starts a real human negotiation session, then fires 2 simultaneous POST /negotiate/message calls for that SAME session_id before either has completed \u2014 checking whether the LangGraph checkpointer serializes concurrent resumes on one thread_id, or lets them race and corrupt the session's state.",
+    "requests_sent": 2,
+    "expected_successes": 1,
+    "actual_successes": 2,
+    "blocked": true,
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "verdict": "PASS",
+    "notes": "No 500s. Status codes: [200, 200], turn_counts: [2, 3]. Both concurrent resumes succeeded but landed on distinct, sequential turns \u2014 the checkpointer serialized them correctly rather than letting both branch off the same starting state.",
+    "timestamp": "2026-08-28T12:54:29.296026+00:00"
+  }
+]

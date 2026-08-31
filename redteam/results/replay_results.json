@@ -1,0 +1,41 @@
+[
+  {
+    "attack_id": "replay.webhook_replay",
+    "description": "Captures one real, validly-signed payment.captured webhook payload (including a realistic top-level event id) for a genuine order, then resends the IDENTICAL payload+signature 5 times sequentially with a 1s gap — asserts only the first call is distinguishable as 'real effect applied' and calls 2-5 come back recognizable as duplicates, not indistinguishable 200s.",
+    "requests_sent": 5,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": false,
+    "verdict": "FAIL",
+    "notes": "order_id=136, razorpay_order_id=order_TVHtudF6xsYSv9, event_id=evt_redteamreplay9eb7192860e841 (present in the payload, Razorpay's own recommended idempotency key). 5 sequential replays, 1s apart. Responses: [(200, '{\"status\":\"ok\"}'), (200, '{\"status\":\"ok\"}'), (200, '{\"status\":\"ok\"}'), (200, '{\"status\":\"ok\"}'), (200, '{\"status\":\"ok\"}')]. order.status after each call: ['paid', 'paid', 'paid', 'paid', 'paid']. CONFIRMED GAP: all 5 responses were byte-identical ('{\"status\":\"ok\"}') — there is no way for a caller (or Razorpay's own retry logic, or an operator reading logs) to tell the first, real application of this event from a no-op replay; the handler has no event_id/payment_id dedup check at all (confirmed by reading backend/app/routes/payments.py). Order state itself stayed consistent (paid) across all 5 calls — harmless today only because every field this handler touches is a plain overwrite to the identical value, not an increment or a side-effecting action.\n\nMERCHANT IMPACT: this webhook handler currently only ever reassigns order.status and razorpay_payment_id to the same values on every replay, which happens to be harmless TODAY — but the handler has no idea it's seeing a duplicate at all. The moment this endpoint grows anything additive (crediting a loyalty-points balance, sending a confirmation email, decrementing stock a second time, triggering a fulfillment webhook to a warehouse system), a replayed or duplicate-delivered webhook (which Razorpay's own docs say to expect — at-least-once delivery, not exactly-once) would double-apply that effect with no code change needed to trigger it — the gap is already live, just not yet expensive.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:25:01.848708+00:00"
+  },
+  {
+    "attack_id": "replay.stale_signature_replay",
+    "description": "Signs a fresh payment.captured payload, waits past any conceivable freshness window, then sends it — asserts it's rejected on age. If no freshness check exists at all (as reading the handler's signature-verification code suggests), this is expected to FAIL and is recorded as its own finding: an unbounded signature validity window.",
+    "requests_sent": 1,
+    "expected_successes": 0,
+    "actual_successes": 1,
+    "blocked": false,
+    "verdict": "FAIL",
+    "notes": "order_id=137, razorpay_order_id=order_TVHu1HwT3GWUcZ, event_id=evt_redteamstale920096feb21e40. Waited 10s after signing before sending (any wait demonstrates the same point equally well here — backend/app/routes/payments.py's razorpay_webhook() calls razorpay_client.utility.verify_webhook_signature(), a pure HMAC-SHA256(body, secret) with no timestamp or nonce component at all, confirmed by reading the SDK; there is no code path that could reject this on age regardless of how long the wait is). Response: HTTP 200 '{\"status\":\"ok\"}'. order.status after: 'paid'. CONFIRMED (as expected): the aged-but-validly-signed payload was accepted and applied exactly like a fresh one — there is no timestamp-based freshness window on this signature at all. Noted explicitly as a finding per this phase's instruction, not silently engineered around.\n\nMERCHANT IMPACT: because the signature has no timestamp/nonce, ANY validly-signed payload capture — however it happened (a compromised log aggregator, a webhook relay/proxy breach, a leaked support ticket with a raw payload pasted into it) — remains replayable indefinitely, not just for a short window after the original delivery. A merchant's real exposure window for a leaked webhook body is 'forever,' not 'until Razorpay's own webhook expires,' because the signature that's supposed to gate it never dies.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:25:14.340638+00:00"
+  },
+  {
+    "attack_id": "replay.approval_token_delayed_reuse",
+    "description": "Redeems a single-use approval_token successfully once, waits 5 seconds (well outside any concurrency race window), then attempts to redeem the SAME token again — a plain replay, not a concurrency attack.",
+    "requests_sent": 2,
+    "expected_successes": 1,
+    "actual_successes": 1,
+    "blocked": true,
+    "verdict": "PASS",
+    "notes": "terms_reference=8e76e90b-273c-4edd-8ff5-8dd379217efa. First redemption: HTTP 200. Waited 5s. Second redemption (same token+terms_reference): HTTP 402 '{\"detail\":\"Unknown or already-used terms_reference\"}'. First succeeded, delayed second was rejected — the same atomic claim on PurchaseIntent.used that holds under concurrency (see concurrency.py's approval_token_race) also holds for a plain, non-concurrent replay after a real delay.",
+    "llm_confused": null,
+    "policy_bypassed": null,
+    "timestamp": "2026-08-28T18:25:25.978624+00:00"
+  }
+]
