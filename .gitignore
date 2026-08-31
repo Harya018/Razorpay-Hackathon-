@@ -25,6 +25,14 @@ analysis/.venv/
 analysis/__pycache__/
 analysis/sim_run.log
 
+metrics/.venv/
+metrics/__pycache__/
+metrics/**/__pycache__/
+
+demo/.venv/
+demo/__pycache__/
+demo/**/__pycache__/
+
 red-team-agent/.venv/
 red-team-agent/__pycache__/
 red-team-agent/**/__pycache__/
