@@ -1,0 +1,27 @@
+{
+  "test_id": "test_concurrent_requests_when_gate_dies_neither_silently_succeeds",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "gate_killed_with_two_in_flight",
+      "ts": 1788161099.3880548,
+      "ts_iso": "2026-08-31T12:54:59",
+      "session_a": "phase17-delay-before-processing-concurrent-a-ad411372",
+      "session_b": "phase17-delay-before-processing-concurrent-b-27362fd0"
+    },
+    {
+      "label": "concurrent_results",
+      "ts": 1788161099.3880548,
+      "ts_iso": "2026-08-31T12:54:59",
+      "results": {
+        "b": {
+          "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+        },
+        "a": {
+          "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+        }
+      }
+    }
+  ]
+}

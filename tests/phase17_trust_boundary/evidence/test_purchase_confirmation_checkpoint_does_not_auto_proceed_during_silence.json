@@ -1,0 +1,42 @@
+{
+  "test_id": "test_purchase_confirmation_checkpoint_does_not_auto_proceed_during_silence",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "shopper_start",
+      "ts": 1788160904.2712443,
+      "ts_iso": "2026-08-31T12:51:44",
+      "response": {
+        "session_id": "e982266b-3f3a-4e5d-a500-217b44ad33d7",
+        "awaiting": "purchase_confirmation",
+        "message": "I found Hand-Thrown Stoneware Mug at \u20b9299.00 \u2014 not negotiating on this one (no negotiation attempted). Want me to go ahead and buy it, or cancel?",
+        "done": false
+      }
+    },
+    {
+      "label": "begin_silence",
+      "ts": 1788160904.2712443,
+      "ts_iso": "2026-08-31T12:51:44",
+      "wait_seconds": 12
+    },
+    {
+      "label": "orders_check_after_silence",
+      "ts": 1788160916.2954316,
+      "ts_iso": "2026-08-31T12:51:56",
+      "orders_before": 148,
+      "orders_now": 148
+    },
+    {
+      "label": "resume_after_silence",
+      "ts": 1788160916.3300061,
+      "ts_iso": "2026-08-31T12:51:56",
+      "response": {
+        "session_id": "e982266b-3f3a-4e5d-a500-217b44ad33d7",
+        "awaiting": null,
+        "message": "Shopper declined to purchase.",
+        "done": true
+      }
+    }
+  ]
+}

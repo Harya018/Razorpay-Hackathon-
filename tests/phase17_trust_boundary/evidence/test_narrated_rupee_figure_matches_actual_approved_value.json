@@ -1,0 +1,82 @@
+{
+  "test_id": "test_narrated_rupee_figure_matches_actual_approved_value",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "run_0_start",
+      "ts": 1788160791.201942,
+      "ts_iso": "2026-08-31T12:49:51",
+      "response": {
+        "session_id": "f25876b6-a3e8-4708-8ce9-4b933f71ab53",
+        "message": "Great news! We can give you a 5% discount on the Hand\u2011Painted Ceramic Table Vase, so your total comes to \u20b92,374.05. Just let us know if you\u2019d like to proceed!",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 237405,
+          "reasoning": "Offering the pre\u2011approved 5% discount makes the purchase more appealing while staying within the store\u2019s agreed promotion."
+        },
+        "offer_status": "proposed",
+        "turn_count": 1
+      }
+    },
+    {
+      "label": "run_0_check",
+      "ts": 1788160791.2025156,
+      "ts_iso": "2026-08-31T12:49:51",
+      "approved_value_rupees": 2374.05,
+      "stated_amounts": [
+        2374.05
+      ]
+    },
+    {
+      "label": "run_1_start",
+      "ts": 1788160813.9048452,
+      "ts_iso": "2026-08-31T12:50:13",
+      "response": {
+        "session_id": "bd42b3e7-d610-4ef0-9dfd-b32608d0f392",
+        "message": "Great news! We're offering a 5% discount on the Hand\u2011Painted Ceramic Table Vase, bringing your total to just\u202f\u20b92,374.05. Let us know if you'd like to proceed!",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 237405,
+          "reasoning": "Provide the predetermined 5% discount to encourage checkout while adhering to the store's set offer and keeping the tone warm and non\u2011pressuring."
+        },
+        "offer_status": "proposed",
+        "turn_count": 1
+      }
+    },
+    {
+      "label": "run_1_check",
+      "ts": 1788160813.9048452,
+      "ts_iso": "2026-08-31T12:50:13",
+      "approved_value_rupees": 2374.05,
+      "stated_amounts": [
+        2374.05
+      ]
+    },
+    {
+      "label": "run_2_start",
+      "ts": 1788160833.4434354,
+      "ts_iso": "2026-08-31T12:50:33",
+      "response": {
+        "session_id": "4de10ce5-d2b5-46c5-ba89-ae91784a369b",
+        "message": "Good news! We can offer you a 5% discount on the Hand\u2011Painted Ceramic Table Vase, bringing the total to \u20b92,374.05. Let us know if you\u2019d like to proceed!",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 237405,
+          "reasoning": "Providing a modest discount encourages the shopper to complete the purchase while adhering to the store\u2019s pre\u2011approved promotion."
+        },
+        "offer_status": "proposed",
+        "turn_count": 1
+      }
+    },
+    {
+      "label": "run_2_check",
+      "ts": 1788160833.4434354,
+      "ts_iso": "2026-08-31T12:50:33",
+      "approved_value_rupees": 2374.05,
+      "stated_amounts": [
+        2374.05
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "test_id": "test_fabricated_price_token_redeems_for_a_real_undervalued_order",
+  "verdict": "FAIL",
+  "notes": "",
+  "steps": [
+    {
+      "label": "evaluate_with_fabricated_price",
+      "ts": 1788160719.1621754,
+      "ts_iso": "2026-08-31T12:48:39",
+      "response": {
+        "approved": true,
+        "reason": null,
+        "max_allowed": null,
+        "approval_token": "a4c77b113a822d1f9b3abfe53d149bc1f3b49beca353e30f80a03725d4dad6db",
+        "final_terms": {
+          "type": "discount",
+          "value": 9000
+        }
+      }
+    },
+    {
+      "label": "redeem_via_real_order_create",
+      "ts": 1788160720.7774458,
+      "ts_iso": "2026-08-31T12:48:40",
+      "request": {
+        "product_id": 1,
+        "quantity": 1,
+        "approval_token": "a4c77b113a822d1f9b3abfe53d149bc1f3b49beca353e30f80a03725d4dad6db"
+      },
+      "status_code": 200,
+      "response": {
+        "razorpay_order_id": "order_TWI9TS7Cp91Kht",
+        "amount": 9000,
+        "key_id": "rzp_test_TTWIKLPbwplPGG"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "test_id": "test_backend_package_is_not_importable_from_buyer_agent_venv",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "subprocess_import_attempt",
+      "ts": 1788160703.2253,
+      "ts_iso": "2026-08-31T12:48:23",
+      "python": "C:\\Users\\harya\\OneDrive\\Desktop\\Razorpay Sep5\\buyer-agent\\.venv\\Scripts\\python.exe",
+      "probe": "import sys; sys.path.insert(0, r'C:\\Users\\harya\\OneDrive\\Desktop\\Razorpay Sep5\\backend'); import app.gate_client",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "label": "subprocess_import_attempt_no_path_hack",
+      "ts": 1788160703.3717418,
+      "ts_iso": "2026-08-31T12:48:23",
+      "probe": "import app.gate_client",
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'app.gate_client'\n"
+    }
+  ]
+}

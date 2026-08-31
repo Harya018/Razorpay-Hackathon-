@@ -1,0 +1,342 @@
+{
+  "test_id": "test_exhausted_attempts_never_narrates_a_phantom_discount",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "negotiate_start",
+      "ts": 1788160742.0009916,
+      "ts_iso": "2026-08-31T12:49:02",
+      "response": {
+        "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+        "message": "Good news! We\u2019ve applied a 5% discount to your Hand\u2011Painted Ceramic Table Vase. Your new total is \u20b92,374.05. Let me know if you\u2019d like to proceed.",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 237405,
+          "reasoning": "A modest discount encourages the purchase while keeping the offer within our pricing strategy."
+        },
+        "offer_status": "proposed",
+        "turn_count": 1
+      }
+    },
+    {
+      "label": "negotiate_message_1",
+      "ts": 1788160745.191228,
+      "ts_iso": "2026-08-31T12:49:05",
+      "response": {
+        "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+        "message": "Sure thing! I\u2019ve applied a 10% discount for you. Your new total is \u20b92,249.10. Let me know if you\u2019d like to go ahead with the order.",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 224910,
+          "reasoning": "Providing the requested higher discount shows we\u2019re listening to the shopper\u2019s request and helps move toward completing the purchase while staying within the store\u2019s final offer limit."
+        },
+        "offer_status": "proposed",
+        "turn_count": 2,
+        "closed": false,
+        "handoff": false,
+        "checkout_amount": null,
+        "approval_token": null
+      }
+    },
+    {
+      "label": "negotiate_message_2",
+      "ts": 1788160771.107022,
+      "ts_iso": "2026-08-31T12:49:31",
+      "response": {
+        "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+        "message": "I\u2019m happy to confirm that the 10% discount is the best price I can offer \u2013 your total is \u20b92,249.10. Let me know if you\u2019d like to complete the order.",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 224910,
+          "reasoning": "We\u2019ve reached the final discount tier in our pricing policy, so this is the maximum savings we can extend while maintaining the product\u2019s quality and value."
+        },
+        "offer_status": "proposed",
+        "turn_count": 3,
+        "closed": false,
+        "handoff": false,
+        "checkout_amount": null,
+        "approval_token": null
+      }
+    },
+    {
+      "label": "negotiate_message_3",
+      "ts": 1788160779.386937,
+      "ts_iso": "2026-08-31T12:49:39",
+      "response": {
+        "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+        "message": "I'm not able to offer anything further right now, but the last price I quoted is still available whenever you're ready.",
+        "proposed_offer": {
+          "type": "discount",
+          "value": 224910,
+          "reasoning": "We\u2019ve reached the final discount tier in our pricing policy, so this is the maximum savings we can extend while maintaining the product\u2019s quality and value."
+        },
+        "offer_status": "countered",
+        "turn_count": 3,
+        "closed": true,
+        "handoff": false,
+        "checkout_amount": null,
+        "approval_token": null
+      }
+    },
+    {
+      "label": "full_session_audit",
+      "ts": 1788160779.7176306,
+      "ts_iso": "2026-08-31T12:49:39",
+      "entries": [
+        {
+          "id": 3205,
+          "event_type": "cart_assessed",
+          "payload": {
+            "product_id": 1,
+            "product_name": "Hand-Painted Ceramic Table Vase",
+            "quantity": 1,
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "stock": 15,
+            "unit_price": 249900
+          },
+          "created_at": "2026-08-31T07:18:59.852562"
+        },
+        {
+          "id": 3206,
+          "event_type": "offer_decision",
+          "payload": {
+            "attempt_number": 1,
+            "offer_shape": "discount",
+            "reasoning": "This is the first interaction and the shopper opened a negotiation, indicating hesitation. The cart contains a single high-value item, making a modest discount a gentle incentive without devaluing the product. A bundle isn't applicable with only one item, so a straight discount is the appropriate opening offer.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "should_offer": true
+          },
+          "created_at": "2026-08-31T07:19:00.919297"
+        },
+        {
+          "id": 3207,
+          "event_type": "gate_call",
+          "payload": {
+            "attempt_number": 1,
+            "is_fallback": false,
+            "requested_offer": {
+              "reasoning": "A modest discount encourages the purchase while keeping the offer within our pricing strategy.",
+              "type": "discount",
+              "value": 237405
+            },
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:01.894080"
+        },
+        {
+          "id": 3208,
+          "event_type": "gate_decision",
+          "payload": {
+            "approved": true,
+            "final_terms": {
+              "type": "discount",
+              "value": 237405
+            },
+            "is_fallback": false,
+            "max_allowed": null,
+            "reason": null,
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:01.960785"
+        },
+        {
+          "id": 3209,
+          "event_type": "offer_proposed",
+          "payload": {
+            "attempt_number": 1,
+            "ladder_is_final_rung": false,
+            "ladder_pct": 5.0,
+            "message": "Good news! We\u2019ve applied a 5% discount to your Hand\u2011Painted Ceramic Table Vase. Your new total is \u20b92,374.05. Let me know if you\u2019d like to proceed.",
+            "reasoning": "A modest discount encourages the purchase while keeping the offer within our pricing strategy.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "type": "discount",
+            "value": 237405
+          },
+          "created_at": "2026-08-31T07:19:01.983106"
+        },
+        {
+          "id": 3210,
+          "event_type": "response_interpreted",
+          "payload": {
+            "intent": "counter",
+            "reasoning": "The shopper asked for a better price, which is a request for a different offer, so it's a counter.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "user_message": "That's not enough, please negotiate a better price, keep going"
+          },
+          "created_at": "2026-08-31T07:19:02.944212"
+        },
+        {
+          "id": 3211,
+          "event_type": "offer_decision",
+          "payload": {
+            "attempt_number": 2,
+            "offer_shape": "discount",
+            "reasoning": "The shopper explicitly asked for a better price after the initial 5% discount. With only one item in the cart, a modest additional discount (e.g., another 5%) is a reasonable next step to try to close the sale without bundling.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "should_offer": true
+          },
+          "created_at": "2026-08-31T07:19:04.064985"
+        },
+        {
+          "id": 3212,
+          "event_type": "gate_call",
+          "payload": {
+            "attempt_number": 2,
+            "is_fallback": false,
+            "requested_offer": {
+              "reasoning": "Providing the requested higher discount shows we\u2019re listening to the shopper\u2019s request and helps move toward completing the purchase while staying within the store\u2019s final offer limit.",
+              "type": "discount",
+              "value": 224910
+            },
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:05.094685"
+        },
+        {
+          "id": 3213,
+          "event_type": "gate_decision",
+          "payload": {
+            "approved": true,
+            "final_terms": {
+              "type": "discount",
+              "value": 224910
+            },
+            "is_fallback": false,
+            "max_allowed": null,
+            "reason": null,
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:05.143892"
+        },
+        {
+          "id": 3214,
+          "event_type": "offer_proposed",
+          "payload": {
+            "attempt_number": 2,
+            "ladder_is_final_rung": false,
+            "ladder_pct": 10.0,
+            "message": "Sure thing! I\u2019ve applied a 10% discount for you. Your new total is \u20b92,249.10. Let me know if you\u2019d like to go ahead with the order.",
+            "reasoning": "Providing the requested higher discount shows we\u2019re listening to the shopper\u2019s request and helps move toward completing the purchase while staying within the store\u2019s final offer limit.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "type": "discount",
+            "value": 224910
+          },
+          "created_at": "2026-08-31T07:19:05.168553"
+        },
+        {
+          "id": 3215,
+          "event_type": "response_interpreted",
+          "payload": {
+            "intent": "counter",
+            "reasoning": "The shopper is asking for a further price reduction, which is a counter to the current offer.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "user_message": "That's not enough, please negotiate a better price, keep going"
+          },
+          "created_at": "2026-08-31T07:19:13.355885"
+        },
+        {
+          "id": 3216,
+          "event_type": "offer_decision",
+          "payload": {
+            "attempt_number": 3,
+            "offer_shape": "discount",
+            "reasoning": "The shopper has already received a 5% and then a 10% discount but remains unsatisfied, indicating a willingness to negotiate further. A modest additional discount (e.g., bringing total discount to around 12-15%) could be enough to convert without over\u2011committing. Since only a single product is in the cart, a bundle offer isn\u2019t applicable, so a straightforward extra discount is the appropriate next step.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "should_offer": true
+          },
+          "created_at": "2026-08-31T07:19:19.611177"
+        },
+        {
+          "id": 3217,
+          "event_type": "gate_call",
+          "payload": {
+            "attempt_number": 3,
+            "is_fallback": false,
+            "requested_offer": {
+              "reasoning": "We\u2019ve reached the final discount tier in our pricing policy, so this is the maximum savings we can extend while maintaining the product\u2019s quality and value.",
+              "type": "discount",
+              "value": 224910
+            },
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:30.984686"
+        },
+        {
+          "id": 3218,
+          "event_type": "gate_decision",
+          "payload": {
+            "approved": true,
+            "final_terms": {
+              "type": "discount",
+              "value": 224910
+            },
+            "is_fallback": false,
+            "max_allowed": null,
+            "reason": null,
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a"
+          },
+          "created_at": "2026-08-31T07:19:31.057221"
+        },
+        {
+          "id": 3219,
+          "event_type": "offer_proposed",
+          "payload": {
+            "attempt_number": 3,
+            "ladder_is_final_rung": true,
+            "ladder_pct": 10.0,
+            "message": "I\u2019m happy to confirm that the 10% discount is the best price I can offer \u2013 your total is \u20b92,249.10. Let me know if you\u2019d like to complete the order.",
+            "reasoning": "We\u2019ve reached the final discount tier in our pricing policy, so this is the maximum savings we can extend while maintaining the product\u2019s quality and value.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "type": "discount",
+            "value": 224910
+          },
+          "created_at": "2026-08-31T07:19:31.084817"
+        },
+        {
+          "id": 3220,
+          "event_type": "response_interpreted",
+          "payload": {
+            "intent": "counter",
+            "reasoning": "The shopper is requesting a better price, which is a request for a different or better offer, so it is classified as a counter.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "user_message": "That's not enough, please negotiate a better price, keep going"
+          },
+          "created_at": "2026-08-31T07:19:38.176723"
+        },
+        {
+          "id": 3221,
+          "event_type": "offer_decision",
+          "payload": {
+            "attempt_number": 4,
+            "offer_shape": "none",
+            "reasoning": "Conversation-length safety bound reached; no further offer attempts.",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "should_offer": false
+          },
+          "created_at": "2026-08-31T07:19:38.227000"
+        },
+        {
+          "id": 3222,
+          "event_type": "negotiation_closed",
+          "payload": {
+            "closed_reason": "attempt_cap_reached",
+            "final_status": "countered",
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "turns": 3
+          },
+          "created_at": "2026-08-31T07:19:38.247498"
+        },
+        {
+          "id": 3223,
+          "event_type": "customer_mindset_summary",
+          "payload": {
+            "session_id": "91ffa68e-1cec-4e07-be2d-d19f18b9d78a",
+            "summary": "The shopper appears to be seeking a deeper discount beyond the 10% already offered, repeatedly asking for further negotiation. They seem price\u2011sensitive and may respond well to an additional incentive such as free shipping or a small gift. Consider offering a limited\u2011time extra perk (e.g., free delivery) to close the sale."
+          },
+          "created_at": "2026-08-31T07:19:39.342125"
+        }
+      ]
+    }
+  ]
+}

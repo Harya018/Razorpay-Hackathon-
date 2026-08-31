@@ -1,0 +1,42 @@
+{
+  "test_id": "test_point_c_killed_after_commit_before_response_is_an_orphaned_approval_not_a_grant",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "gate_killed_after_commit_sleep_started",
+      "ts": 1788161091.4613218,
+      "ts_iso": "2026-08-31T12:54:51",
+      "killed_at_offset_seconds": 4.0
+    },
+    {
+      "label": "request_thread_result",
+      "ts": 1788161091.4613218,
+      "ts_iso": "2026-08-31T12:54:51",
+      "result": {
+        "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
+      }
+    },
+    {
+      "label": "orphaned_approval_in_gate_db",
+      "ts": 1788161093.827516,
+      "ts_iso": "2026-08-31T12:54:53",
+      "found": {
+        "session_id": "phase17-delay-after-commit-2d60a781",
+        "decision": "approved",
+        "final_amount": 237405,
+        "used": 0
+      }
+    },
+    {
+      "label": "attempted_redemption_of_orphaned_decision",
+      "ts": 1788161094.1362517,
+      "ts_iso": "2026-08-31T12:54:54",
+      "response": {
+        "razorpay_order_id": "order_TWIG2vwQ9Xc5vf",
+        "amount": 249900,
+        "key_id": "rzp_test_TTWIKLPbwplPGG"
+      }
+    }
+  ]
+}

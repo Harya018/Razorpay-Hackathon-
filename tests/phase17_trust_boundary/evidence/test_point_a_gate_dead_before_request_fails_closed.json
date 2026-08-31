@@ -1,0 +1,32 @@
+{
+  "test_id": "test_point_a_gate_dead_before_request_fails_closed",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "gate_killed",
+      "ts": 1788161057.60933,
+      "ts_iso": "2026-08-31T12:54:17",
+      "note": "policy-gate process terminated before sending any request"
+    },
+    {
+      "label": "negotiate_start_with_gate_down",
+      "ts": 1788161062.762931,
+      "ts_iso": "2026-08-31T12:54:22",
+      "response": {
+        "session_id": "cdd5f672-454c-4f79-b626-738326bdfd34",
+        "message": "I'm not able to offer a discount on this right now, but I'd still love for you to grab it at the listed price.",
+        "proposed_offer": null,
+        "offer_status": "none",
+        "turn_count": 1
+      }
+    },
+    {
+      "label": "orders_check",
+      "ts": 1788161062.7938473,
+      "ts_iso": "2026-08-31T12:54:22",
+      "before": 148,
+      "after": 148
+    }
+  ]
+}

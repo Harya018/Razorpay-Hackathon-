@@ -1,0 +1,35 @@
+{
+  "test_id": "test_no_new_backend_coupling_imports_added_in_phase_12_through_16",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "scanned_files",
+      "ts": 1788160703.4428356,
+      "ts_iso": "2026-08-31T12:48:23",
+      "files": [
+        "buyer-agent\\app\\client.py",
+        "buyer-agent\\app\\config.py",
+        "buyer-agent\\app\\llm.py",
+        "buyer-agent\\app\\main.py",
+        "buyer-agent\\app\\server.py",
+        "buyer-agent\\app\\x402_headers.py",
+        "buyer-agent\\app\\__init__.py",
+        "buyer-agent\\app\\graph\\discount_ladder.py",
+        "buyer-agent\\app\\graph\\graph.py",
+        "buyer-agent\\app\\graph\\nodes.py",
+        "buyer-agent\\app\\graph\\state.py",
+        "buyer-agent\\app\\graph\\__init__.py",
+        "buyer-agent\\app\\routes\\shopper.py",
+        "buyer-agent\\app\\routes\\__init__.py"
+      ],
+      "count": 14
+    },
+    {
+      "label": "flagged_imports",
+      "ts": 1788160703.4428356,
+      "ts_iso": "2026-08-31T12:48:23",
+      "flagged": []
+    }
+  ]
+}

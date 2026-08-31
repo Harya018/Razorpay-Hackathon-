@@ -1,0 +1,422 @@
+[
+  {
+    "session_id": "sim-001",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-002",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-003",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "counter_twice_then_accept"
+  },
+  {
+    "session_id": "sim-004",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-005",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-006",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_twice_then_accept"
+  },
+  {
+    "session_id": "sim-007",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-008",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-009",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_accept"
+  },
+  {
+    "session_id": "sim-010",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-011",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-012",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-013",
+    "product_id": 2,
+    "quantity": 3,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_reject"
+  },
+  {
+    "session_id": "sim-014",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-015",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-016",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "push_until_cap"
+  },
+  {
+    "session_id": "sim-017",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-018",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-019",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-020",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-021",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_twice_then_accept"
+  },
+  {
+    "session_id": "sim-022",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-023",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "push_until_cap"
+  },
+  {
+    "session_id": "sim-024",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-025",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-026",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-027",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_reject"
+  },
+  {
+    "session_id": "sim-028",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-029",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-030",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-031",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-032",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_accept"
+  },
+  {
+    "session_id": "sim-033",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-034",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-035",
+    "product_id": 2,
+    "quantity": 3,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-036",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_twice_then_accept"
+  },
+  {
+    "session_id": "sim-037",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "push_until_cap"
+  },
+  {
+    "session_id": "sim-038",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-039",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-040",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-041",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-042",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_once_then_accept"
+  },
+  {
+    "session_id": "sim-043",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-044",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_then_reject"
+  },
+  {
+    "session_id": "sim-045",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-046",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-047",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-048",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-049",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-050",
+    "product_id": 2,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_reject"
+  },
+  {
+    "session_id": "sim-051",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-052",
+    "product_id": 1,
+    "quantity": 2,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_reject"
+  },
+  {
+    "session_id": "sim-053",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_accept"
+  },
+  {
+    "session_id": "sim-054",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-055",
+    "product_id": 1,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "immediate_accept"
+  },
+  {
+    "session_id": "sim-056",
+    "product_id": 2,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-057",
+    "product_id": 1,
+    "quantity": 3,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-058",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-059",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": false,
+    "shopper_persona": null
+  },
+  {
+    "session_id": "sim-060",
+    "product_id": 2,
+    "quantity": 1,
+    "would_hesitate": true,
+    "shopper_persona": "counter_twice_then_accept"
+  }
+]

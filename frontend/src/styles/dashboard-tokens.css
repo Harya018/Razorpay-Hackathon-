@@ -1,0 +1,71 @@
+/*
+  REGISTER 2 — Merchant dashboard ("audit-grade instrument panel")
+  ==================================================================
+
+  Rationale: this surface's job is to make "every money action explainable,
+  bounded, and gated" visible before a judge reads a single word of copy —
+  trust here comes from precision and legibility, not warmth, so it must
+  read as a fintech operator's control surface, not a friendly admin panel.
+  A dark slate shell (like an instrument's housing) frames light content
+  "screens" (like a readout) where the actual data lives — tables, chat
+  threads, audit rows — so the eye immediately separates chrome from data.
+  A monospace face is reserved specifically for numeric/log/audit content
+  (amounts, timestamps, event types, session ids) so those fields read as
+  precise, fixed-width, ledger-like data rather than prose; labels and nav
+  stay in the same plain sans the storefront uses, since the CONTRAST that
+  matters here is mono-vs-sans within this one surface, not a second
+  typeface family competing with the storefront's serif.
+
+  Color-coding for deterministic vs. LLM-driven components is reused
+  EXACTLY from the Phase 15 architecture diagram (docs/architecture-diagram.svg)
+  so the same visual language holds across the whole submission: solid
+  slate for deterministic logic, dashed violet for LLM-driven reasoning.
+  Tailwind's own `slate` and `violet` scales already match those exact hex
+  values (slate-700 = #334155, slate-200 = #e2e8f0, violet-600 = #7c3aed,
+  violet-100 = #ede9fe) — used directly via Tailwind utilities rather than
+  re-declared here, so there is exactly one source of truth for those two
+  colors, not two that could drift apart.
+*/
+
+:root {
+  /* Slate instrument housing — page/shell background, dark panel chrome */
+  --panel: #1c2430;
+  --panel-raised: #253044;
+
+  /* Cool white content "screens" — where audit/ledger/chat data actually sits */
+  --content-bg: #f7f8fa;
+
+  /* Single restrained accent — live/active states ONLY, never decorative */
+  --accent-live: #3b82f6;
+  --accent-live-dim: #93b8f5;
+
+  --text-inverse: #f7f8fa;
+  --text-inverse-dim: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* SSE "new entry" tick — one small, deliberate highlight flash on insert,
+   nothing else in this register animates. Runs once per row, then settles
+   back to the resting content background. */
+@keyframes ledger-row-tick {
+  0% {
+    background-color: rgba(59, 130, 246, 0.16);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.ledger-row-tick {
+  animation: ledger-row-tick 900ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ledger-row-tick {
+    animation: none;
+  }
+}

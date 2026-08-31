@@ -44,3 +44,6 @@ redteam/**/__pycache__/
 redteam/.env
 
 .tools/
+tests/**/__pycache__/
+tests/.pytest_cache/
+tests/**/.pytest_cache/

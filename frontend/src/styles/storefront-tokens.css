@@ -1,0 +1,80 @@
+/*
+  REGISTER 1 — Storefront + negotiation popup ("Priya's shop")
+  =============================================================
+
+  Rationale: this surface's whole job is to feel like a real maker's shop,
+  not a templated e-commerce SaaS demo — the negotiation happening here is
+  a genuine, gated, server-verified conversation, and the visual register
+  needs to earn that claim before a shopper reads a word of copy. Warm,
+  slightly uneven, hand-dyed color tones (clay/putty/moss/ink/ivory)
+  deliberately avoid the cream-and-terracotta "AI template" look and the
+  blue-on-white e-commerce default. A warm display serif (Fraunces) carries
+  personality on product names and headlines; a quiet, plain sans (Inter)
+  handles body copy and UI chrome so it never competes with the serif for
+  attention. The negotiation popup gets its own signature treatment (see
+  NegotiationNotification.jsx) — an irregular, slightly rotated "note"
+  rather than a centered modal — because a handwritten note FROM a person
+  is a different promise than a coupon popup FROM a system, and this
+  project's actual architecture (a real seller agent, gated by a real
+  policy check) is closer to the former.
+
+  Adjusted from the brief's starting palette in one place: added -dark/
+  -light variants of each hue (derived, not invented) so hover/pressed/
+  subtle-background states have somewhere to go without reaching for a
+  generic gray. The five named hues themselves are used exactly as given.
+*/
+
+:root {
+  /* Deep clay — primary actions, CTA, warm headline accents */
+  --clay: #8b6552;
+  --clay-dark: #6e4f3f;
+  --clay-light: #a98977;
+
+  /* Warm putty — card/section backgrounds, borders, quiet surfaces */
+  --putty: #d9cbb8;
+  --putty-dark: #c2ad91;
+  --putty-light: #e5dac9;
+
+  /* Moss — secondary accent: successful negotiation states, links, "in stock" */
+  --moss: #5c6e52;
+  --moss-dark: #46543e;
+  --moss-light: #7c9270;
+
+  /* Ink — body text, headings */
+  --ink: #2b2823;
+  --ink-soft: #5c574c;
+
+  /* Soft ivory — page background, note paper */
+  --ivory: #f2ede3;
+  --ivory-deep: #eae1d0;
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* The negotiation popup's one deliberate entrance moment — settling into
+   place like a note being set down, never sliding in like a banner. Scale
+   + rotate + a short drop, eased out; runs once on mount, nothing loops. */
+@keyframes note-settle {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) rotate(-3.5deg) scale(1.04);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--note-rest-rotation, -1deg)) scale(1);
+  }
+}
+
+.note-settle-in {
+  animation: note-settle 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-settle-in {
+    animation: none;
+  }
+}

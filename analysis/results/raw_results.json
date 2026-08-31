@@ -1,0 +1,1635 @@
+{
+  "run": {
+    "generated_at": "2026-08-24T11:20:22.211968+00:00",
+    "backend_base_url": "http://localhost:8010",
+    "session_count_requested": 60,
+    "session_count_processed": 60,
+    "hesitation_rate_target": 0.35,
+    "seed": 42,
+    "results": [
+      {
+        "session_id": "sim-001",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-002",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "6c43ed1a-1237-4e13-83b5-e868d5848007",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have our wireless headphones in your cart. They are a customer favorite for their sound quality. If you're ready to head to checkout today, I'd love to offer them to you for 2299 INR to help you get started."
+          },
+          {
+            "role": "user",
+            "message": "Can you offer a bigger discount than that?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand looking for the best value! While I can't go lower than that, I can lock in the 2299 INR price for you if you'd like to finalize your order today. It's the best I'm able to offer, but I'm happy to help if you have any other questions about the headphones."
+          },
+          {
+            "role": "user",
+            "message": "That's still not quite enough for me \u2014 I'll pass, thanks anyway."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you for considering us, and please don't hesitate to reach out if you have any questions in the future. Have a great day!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-003",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "counter_twice_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 450000,
+        "discount_given": 49800,
+        "negotiation_turns": 3,
+        "negotiation_session_id": "91408f49-2bbf-4b66-af22-c38395e43334",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaI3LfZuCtO1q",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have two pairs of our wireless headphones in your cart. If you're ready to complete your purchase today, I'd love to offer them to you for a total of 4,750 INR."
+          },
+          {
+            "role": "user",
+            "message": "Is there any room to come down on the price a bit?"
+          },
+          {
+            "role": "assistant",
+            "message": "I understand! I want to make sure you're comfortable with the price. As a one-time gesture, I can bring the total down to 4,600 INR for both pairs to help get these to you."
+          },
+          {
+            "role": "user",
+            "message": "I appreciate it, but could you sweeten it just a little more?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand you're looking for the best value. While I've reached my limit on price reductions, I can offer a final total of 4,500 INR to help you finalize your purchase today. I hope this helps!"
+          },
+          {
+            "role": "user",
+            "message": "Alright, deal \u2014 I'll go with that."
+          },
+          {
+            "role": "assistant",
+            "message": "That's great to hear! I'm so glad we could make that work for you. Please proceed to checkout whenever you're ready to complete your order."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-004",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 224910,
+        "discount_given": 24990,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "489a881a-b551-4797-ad24-9ffaacf7b33a",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaIhuniGeWhUw",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful! I've updated your cart with the discounted price, so please go ahead and complete your checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-005",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 499800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-006",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_twice_then_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "f9ea457d-3bf5-44ac-b432-3f5ff580fe1a",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our ceramic coffee mug. It\u2019s a great choice for your morning routine. As a little welcome gesture, I\u2019d love to offer it to you for 270 INR if you\u2019d like to complete your order today."
+          },
+          {
+            "role": "user",
+            "message": "Is there any room to come down on the price a bit?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "I appreciate it, but could you sweeten it just a little more?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-007",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-008",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-009",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 27000,
+        "discount_given": 2900,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "e6266040-2e0e-4a0a-a501-a77a643c0f21",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaJfssfvHK6qd",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our ceramic coffee mug. It\u2019s a great choice for your morning routine. As a small token of appreciation for stopping by, I\u2019d like to offer it to you for 270 instead of 299 today. No pressure at all, but let me know if you\u2019d like me to update that for you!"
+          },
+          {
+            "role": "user",
+            "message": "Yes, that works for me \u2014 I'll take it at that price."
+          },
+          {
+            "role": "assistant",
+            "message": "Wonderful! I've applied the discount to your cart. Please head to the checkout whenever you're ready to complete your purchase."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-010",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-011",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-012",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 499800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-013",
+        "product_id": 2,
+        "quantity": 3,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_reject",
+        "original_unit_price": 29900,
+        "original_total_price": 89700,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "878ce85d-5766-4639-b9ed-57f2f3753dfb",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed these mugs are still in your cart. They are a wonderful choice for your home. To help you finalize your order today, I'd like to offer you a small discount of 800 INR for the set of three."
+          },
+          {
+            "role": "user",
+            "message": "No thanks, not interested right now."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you for considering us, and please feel free to reach out if you change your mind in the future!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-014",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": true,
+        "final_price": 59800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-015",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "aff7a8a7-1516-4404-8829-6eb2d54beca8",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you were looking at our Wireless Headphones. If you're ready to make them yours today, I can apply a small discount to bring the total down to \u20b92,350. Let me know if that helps, or if you have any questions!"
+          },
+          {
+            "role": "user",
+            "message": "Can you offer a bigger discount than that?"
+          },
+          {
+            "role": "assistant",
+            "message": "I understand you're looking for a better deal. While I can't go much lower due to our current pricing, I can offer a final price of \u20b92,275 for these headphones today. Let me know if that works for you!"
+          },
+          {
+            "role": "user",
+            "message": "That's still not quite enough for me \u2014 I'll pass, thanks anyway."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you for considering us, and I hope you have a wonderful day!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-016",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "push_until_cap",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "97df271d-e990-49dc-bdcb-6db3719e5c20",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you were looking at our Ceramic Coffee Mug. It\u2019s one of our favorites. If you're ready to complete your order today, I'd love to offer it to you for 269 INR instead of 299. Let me know if that helps!"
+          },
+          {
+            "role": "user",
+            "message": "Can you go lower? I was hoping for a much bigger discount."
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Still not enough \u2014 I really need at least 25% off to make this work."
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-017",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 465000,
+        "discount_given": 34800,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "fe2e830f-867b-452b-811a-76bf3263f978",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaM2nZheyXhEH",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have two pairs of our wireless headphones in your cart. If you're ready to complete your purchase today, I'd love to offer them to you for a total of 4750 INR."
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand wanting the best value! While I can't go much lower due to our costs, I can offer these to you for a total of 4650 INR if you're ready to check out today. How does that sound?"
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful to hear! I've updated your total to 4650 INR, and you can proceed to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-018",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-019",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-020",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": "negotiate/start failed: HTTPConnectionPool(host='localhost', port=8010): Read timed out. (read timeout=60)",
+        "conversation": []
+      },
+      {
+        "session_id": "sim-021",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_twice_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "9737407b-7105-49e2-afc5-e48eb88a4608",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our wireless headphones. Since you're ready to pick them up, I'd like to offer them to you today for 2299 INR instead. No pressure at all\u2014just wanted to help make your decision a little easier."
+          },
+          {
+            "role": "user",
+            "message": "Is there any room to come down on the price a bit?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "I appreciate it, but could you sweeten it just a little more?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-022",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-023",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "push_until_cap",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "26c38223-f007-4662-ac5c-0eb9c00682e6",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Can you go lower? I was hoping for a much bigger discount."
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Still not enough \u2014 I really need at least 25% off to make this work."
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-024",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": true,
+        "final_price": 55000,
+        "discount_given": 4800,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "325b22ef-5ccd-44d8-8a4e-e130991a4bcf",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaP6zoYjjZqMU",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you were looking at our ceramic mugs. I'd love to help you get those ordered today, so I've applied a small discount to your total to welcome you to our shop."
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand! Since you're picking up a pair, I can shave a little more off the total for you. How does 550 rupees sound for both mugs?"
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful to hear! I've updated your total to 550 INR, so you can proceed to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-025",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "ee825aec-65dc-4fce-8bca-c839ce619434",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our ceramic coffee mug. It\u2019s a great choice for your morning routine. As a small gesture to help you decide, I\u2019d like to offer you a little discount\u2014you can pick this up for 269 rupees instead of 299."
+          },
+          {
+            "role": "user",
+            "message": "Can you offer a bigger discount than that?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand you're looking for a better deal. Since we are a small shop, 269 is actually the lowest I can go while still covering our shipping and packaging costs. I'm sorry I can't go any lower, but I'd love to help you get this mug if that price works for you."
+          },
+          {
+            "role": "user",
+            "message": "That's still not quite enough for me \u2014 I'll pass, thanks anyway."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand! Thank you for considering us, and please feel free to reach out if you change your mind in the future. Have a lovely day."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-026",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-027",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "21fcfaf7-b44d-4dfb-a730-2a9d928b7944",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have three pairs of our wireless headphones in your cart. If you're ready to complete your purchase today, I'd like to offer them to you for a total of 7100 INR instead of the original price."
+          },
+          {
+            "role": "user",
+            "message": "No thanks, not interested right now."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand! Thanks for letting me know, and feel free to reach out if you change your mind in the future."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-028",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": true,
+        "final_price": 59800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-029",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-030",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-031",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-032",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": true,
+        "final_price": 54000,
+        "discount_given": 5800,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "da6d60f2-a4df-48c3-a778-2571c80eed3d",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaQJMTFHrbZxF",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you were looking at our ceramic coffee mugs. If you're still thinking it over, I can offer a small discount to bring your total to 540 rupees today. No pressure at all, just wanted to help if you were ready to checkout."
+          },
+          {
+            "role": "user",
+            "message": "Yes, that works for me \u2014 I'll take it at that price."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful! I'm so glad we could make that work for you. I've updated your total, so please feel free to proceed to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-033",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": true,
+        "final_price": 59800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-034",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "b8672b7f-dd4d-414f-af96-94c78e5ad4c3",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have three pairs of our wireless headphones in your cart. If you're ready to complete your purchase today, I'd love to help out with a small discount to bring your total to \u20b96,997. Let me know if that works for you!"
+          },
+          {
+            "role": "user",
+            "message": "Can you offer a bigger discount than that?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand looking for the best value! While I can't go much lower due to our current margins, I can settle on a total of \u20b96,750 for the three pairs to help make your decision a bit easier. Does that feel more comfortable for you?"
+          },
+          {
+            "role": "user",
+            "message": "That's still not quite enough for me \u2014 I'll pass, thanks anyway."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you so much for considering us, and please don't hesitate to reach out if there is anything else I can assist you with in the future!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-035",
+        "product_id": 2,
+        "quantity": 3,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 89700,
+        "converted": true,
+        "final_price": 82500,
+        "discount_given": 7200,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "25690a3f-42ad-4f62-bdc0-71ef3470c661",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaRk3RKEFN4pz",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have three of our ceramic mugs in your cart. They are a wonderful choice for your morning routine. Since you are looking to pick up a few, I would love to help you out by rounding the total down to 850 INR to make your checkout a little smoother."
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I understand you're looking for a bit more value! While our margins are quite slim on these handcrafted mugs, I can adjust the total to 825 INR to help get these to you today. This is the best I can offer for this set."
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful to hear! I have updated your cart to the 825 INR total, so you can go ahead and complete your checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-036",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_twice_then_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "ec910761-82dd-423c-8e25-265578f795ef",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you're checking out our ceramic coffee mug. If you're ready to complete your purchase today, I'd love to offer a small discount to help get this into your hands\u2014you can grab it for \u20b9270 instead."
+          },
+          {
+            "role": "user",
+            "message": "Is there any room to come down on the price a bit?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "I appreciate it, but could you sweeten it just a little more?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-037",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "push_until_cap",
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "a44c6726-2516-48fd-bca4-62d1a920cf58",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have our Ceramic Coffee Mugs in your cart. I'd love to help you get these home, so I've applied a small discount to your total if you're ready to complete your purchase today."
+          },
+          {
+            "role": "user",
+            "message": "Can you go lower? I was hoping for a much bigger discount."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand looking for the best value! While I'm unable to offer a larger discount due to our current pricing, I can adjust the total to 550 rupees to help make this a bit more accessible for you today. Let me know if that works!"
+          },
+          {
+            "role": "user",
+            "message": "Still not enough \u2014 I really need at least 25% off to make this work."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand looking for the best value! While I'm unable to offer a larger discount due to our current pricing, I can adjust the total to 550 rupees to help make this a bit more accessible for you today. Let me know if that works!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-038",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 690000,
+        "discount_given": 59700,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "e9eb7836-7d21-4ae5-9fb4-c097d7891df0",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaTnwv5oKVwHA",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have three pairs of our Wireless Headphones in your cart. If you're ready to complete your purchase today, I'd love to help by offering a small reduction to your total, bringing it to 7100 INR. Please let me know if this helps!"
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand you're looking for the best value. While I can't go much lower due to our margins, I can finalize this for 6900 INR to help you out. Does that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful! I'm so glad we could make that work for you. I've updated your cart with the new total of 6900 INR\u2014you can head over to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-039",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-040",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 499800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-041",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 499800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-042",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_once_then_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 224910,
+        "discount_given": 24990,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "e0536a2f-dc66-4c97-97fd-72ea28fb2680",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaUQxkqmE8ro5",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have our wireless headphones in your cart. They are a customer favorite for their sound quality. If you're ready to head to checkout today, I'd love to offer them to you for 2299 INR to help make your decision a little easier."
+          },
+          {
+            "role": "user",
+            "message": "Can you do a little better on the price?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Okay, that works \u2014 I'll take it."
+          },
+          {
+            "role": "assistant",
+            "message": "That's great news! I've updated your cart with the final price of \u20b92249.10, so you can head over to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-043",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-044",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_then_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "5cfbfbcb-2340-4239-b5a5-ef12ed0eeac5",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Can you offer a bigger discount than that?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-045",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": true,
+        "final_price": 499800,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-046",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-047",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-048",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-049",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-050",
+        "product_id": 2,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_reject",
+        "original_unit_price": 29900,
+        "original_total_price": 59800,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "f6f0625b-e434-4786-abd7-783686c57bdc",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have two of our ceramic mugs in your cart. If you're ready to complete your purchase today, I'd love to offer them to you for a total of 550 INR. Let me know if that works for you!"
+          },
+          {
+            "role": "user",
+            "message": "No thanks, not interested right now."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you for your time, and please feel free to reach out if you change your mind in the future!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-051",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-052",
+        "product_id": 1,
+        "quantity": 2,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_reject",
+        "original_unit_price": 249900,
+        "original_total_price": 499800,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "38e0e9f6-ec2d-48a7-bf39-2ef73f6646d9",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have two pairs of our wireless headphones in your cart. If you're ready to pick these up today, I'd love to help out by adjusting the total to 4750 INR for you. Would that help make your decision a little easier?"
+          },
+          {
+            "role": "user",
+            "message": "No thanks, not interested right now."
+          },
+          {
+            "role": "assistant",
+            "message": "I completely understand. Thank you for considering us, and please feel free to reach out if you have any questions in the future!"
+          }
+        ]
+      },
+      {
+        "session_id": "sim-053",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 224910,
+        "discount_given": 24990,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "09e9d6c9-db03-4f97-8f2a-5ef117799bf0",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaVffz44rSE71",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b92249.10. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "Yes, that works for me \u2014 I'll take it at that price."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful! I've updated your cart with the new price, so you are all set to head over to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-054",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 249900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-055",
+        "product_id": 1,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "immediate_accept",
+        "original_unit_price": 249900,
+        "original_total_price": 249900,
+        "converted": true,
+        "final_price": 237400,
+        "discount_given": 12500,
+        "negotiation_turns": 1,
+        "negotiation_session_id": "c1d06966-38ba-4922-a6b1-a07a325f90a3",
+        "order_id": null,
+        "razorpay_order_id": "order_TTaW8JI78nxTwq",
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our wireless headphones. If you're ready to complete your order today, I'd love to help by offering a small discount to bring the total down to 2374 INR. No pressure at all, but please let me know if that helps your decision!"
+          },
+          {
+            "role": "user",
+            "message": "Yes, that works for me \u2014 I'll take it at that price."
+          },
+          {
+            "role": "assistant",
+            "message": "That's wonderful to hear! I've updated your cart with the discounted price, and you can proceed to checkout whenever you're ready."
+          }
+        ]
+      },
+      {
+        "session_id": "sim-056",
+        "product_id": 2,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 89700,
+        "converted": true,
+        "final_price": 89700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-057",
+        "product_id": 1,
+        "quantity": 3,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 249900,
+        "original_total_price": 749700,
+        "converted": true,
+        "final_price": 749700,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-058",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-059",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": false,
+        "shopper_persona": null,
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": true,
+        "final_price": 29900,
+        "discount_given": 0,
+        "negotiation_turns": 0,
+        "negotiation_session_id": null,
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": []
+      },
+      {
+        "session_id": "sim-060",
+        "product_id": 2,
+        "quantity": 1,
+        "would_hesitate": true,
+        "shopper_persona": "counter_twice_then_accept",
+        "original_unit_price": 29900,
+        "original_total_price": 29900,
+        "converted": false,
+        "final_price": null,
+        "discount_given": 0,
+        "negotiation_turns": 2,
+        "negotiation_session_id": "156c9ab3-522e-4d59-83d1-1e4e18322413",
+        "order_id": null,
+        "razorpay_order_id": null,
+        "error": null,
+        "conversation": [
+          {
+            "role": "assistant",
+            "message": "Hi there! I noticed you have your eye on our ceramic coffee mug. It\u2019s a wonderful choice for your morning brew. To help you make up your mind, I\u2019d like to offer you a small discount to bring the total down to 269 INR."
+          },
+          {
+            "role": "user",
+            "message": "Is there any room to come down on the price a bit?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          },
+          {
+            "role": "user",
+            "message": "I appreciate it, but could you sweeten it just a little more?"
+          },
+          {
+            "role": "assistant",
+            "message": "I can't do quite that much, but the best I'm able to offer right now is a total of \u20b9254.15. Would that work for you?"
+          }
+        ]
+      }
+    ]
+  },
+  "aggregate": {
+    "total_sessions": 60,
+    "hesitating_sessions": 28,
+    "non_hesitating_sessions": 32,
+    "converted_hesitating_sessions": 11,
+    "errored_hesitating_sessions": 1,
+    "baseline_total_revenue_paise": 10754200,
+    "with_agent_total_revenue_paise": 13489830,
+    "gross_recovered_revenue_paise": 2988100,
+    "discount_cost_paise": 252470,
+    "net_recovered_revenue_paise": 2735630,
+    "recovery_rate": 0.39285714285714285,
+    "avg_discount_per_recovered_session_paise": 22951.81818181818,
+    "persona_breakdown": {
+      "counter_then_reject": {
+        "count": 6,
+        "converted": 0
+      },
+      "counter_twice_then_accept": {
+        "count": 5,
+        "converted": 1
+      },
+      "counter_once_then_accept": {
+        "count": 6,
+        "converted": 6
+      },
+      "immediate_accept": {
+        "count": 4,
+        "converted": 4
+      },
+      "immediate_reject": {
+        "count": 4,
+        "converted": 0
+      },
+      "push_until_cap": {
+        "count": 3,
+        "converted": 0
+      }
+    }
+  }
+}

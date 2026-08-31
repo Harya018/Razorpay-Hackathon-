@@ -1,0 +1,98 @@
+{
+  "test_id": "test_tampering_sandbox_does_not_break_real_chain_verification",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "real_chain_verify_before_tamper",
+      "ts": 1788160630.8071342,
+      "ts_iso": "2026-08-31T12:47:10",
+      "response": {
+        "chain_key": "session:agent-negotiate-9e4dbc4c-5f92-4072-b208-1bfd73fa8d41",
+        "valid": true,
+        "total_rows": 2,
+        "broken_at_row_id": null,
+        "reason": null
+      }
+    },
+    {
+      "label": "sandbox_tamper",
+      "ts": 1788160630.9347322,
+      "ts_iso": "2026-08-31T12:47:10",
+      "response": {
+        "chain_key": "session:demo:sandbox",
+        "entries": [
+          {
+            "id": 3200,
+            "event_type": "demo_sandbox_entry",
+            "created_at": "2026-08-31T07:17:10.841066",
+            "order_id": null,
+            "entry_hash": "0e53e346039f910ecbb800efa3ba230a27d7c5e3ab4b261af6f7e791d74854ec",
+            "entry_hash_short": "0e53e346039f",
+            "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "previous_hash_short": "000000000000",
+            "summary": "Sandbox opened [TAMPERED]"
+          },
+          {
+            "id": 3201,
+            "event_type": "demo_sandbox_entry",
+            "created_at": "2026-08-31T07:17:10.853027",
+            "order_id": null,
+            "entry_hash": "ae2891121045cbe8d6370f3487b35a0ecb644689301a547da53bfe07b3fe8c44",
+            "entry_hash_short": "ae2891121045",
+            "previous_hash": "0e53e346039f910ecbb800efa3ba230a27d7c5e3ab4b261af6f7e791d74854ec",
+            "previous_hash_short": "0e53e346039f",
+            "summary": "Sandbox offer proposed"
+          },
+          {
+            "id": 3202,
+            "event_type": "demo_sandbox_entry",
+            "created_at": "2026-08-31T07:17:10.869264",
+            "order_id": null,
+            "entry_hash": "5202e429fd76758fb57b79229829eacecbc02b3d310c2a49df41bbec20ee6356",
+            "entry_hash_short": "5202e429fd76",
+            "previous_hash": "ae2891121045cbe8d6370f3487b35a0ecb644689301a547da53bfe07b3fe8c44",
+            "previous_hash_short": "ae2891121045",
+            "summary": "Sandbox offer accepted"
+          },
+          {
+            "id": 3203,
+            "event_type": "demo_sandbox_entry",
+            "created_at": "2026-08-31T07:17:10.886233",
+            "order_id": null,
+            "entry_hash": "91451dc24cc34167498dbfbcfb83ad98241fbf8e580a5b52ccbc4937c1816350",
+            "entry_hash_short": "91451dc24cc3",
+            "previous_hash": "5202e429fd76758fb57b79229829eacecbc02b3d310c2a49df41bbec20ee6356",
+            "previous_hash_short": "5202e429fd76",
+            "summary": "Sandbox order recorded"
+          }
+        ],
+        "count": 4
+      }
+    },
+    {
+      "label": "sandbox_verify_after_tamper",
+      "ts": 1788160631.0010974,
+      "ts_iso": "2026-08-31T12:47:11",
+      "response": {
+        "chain_key": "session:demo:sandbox",
+        "valid": false,
+        "total_rows": 4,
+        "broken_at_row_id": 3200,
+        "reason": "entry_hash mismatch (tampered)"
+      }
+    },
+    {
+      "label": "real_chain_verify_after_tamper",
+      "ts": 1788160631.2030702,
+      "ts_iso": "2026-08-31T12:47:11",
+      "response": {
+        "chain_key": "session:agent-negotiate-9e4dbc4c-5f92-4072-b208-1bfd73fa8d41",
+        "valid": true,
+        "total_rows": 2,
+        "broken_at_row_id": null,
+        "reason": null
+      }
+    }
+  ]
+}
