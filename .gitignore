@@ -1,6 +1,7 @@
 backend/.venv/
 backend/__pycache__/
 backend/**/__pycache__/
+backend/.pytest_cache/
 backend/app.db
 backend/.env
 
@@ -8,9 +9,30 @@ policy-gate/.venv/
 policy-gate/__pycache__/
 policy-gate/**/__pycache__/
 policy-gate/.env
+policy-gate/policy_gate.db
+policy-gate/*.log
 
 frontend/node_modules/
 frontend/dist/
 frontend/.env.local
+
+buyer-agent/.venv/
+buyer-agent/__pycache__/
+buyer-agent/**/__pycache__/
+buyer-agent/.env
+
+analysis/.venv/
+analysis/__pycache__/
+analysis/sim_run.log
+
+red-team-agent/.venv/
+red-team-agent/__pycache__/
+red-team-agent/**/__pycache__/
+red-team-agent/.env
+
+redteam/.venv/
+redteam/__pycache__/
+redteam/**/__pycache__/
+redteam/.env
 
 .tools/

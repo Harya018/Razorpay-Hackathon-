@@ -1,14 +1,20 @@
 from fastapi import FastAPI
 
-from app.routes import health
+from app.database import Base, engine, run_migrations
+from app.models import approval  # noqa: F401 — ensures Approval registers on Base.metadata
+from app.routes import evaluate, health
 
-# This service is intentionally minimal in Phase 1: it exists to prove the
-# policy gate is a real, independently-running service with its own port
-# and entrypoint, not a function the seller-side backend calls in-process.
-# Decision logic (/evaluate, discount caps, stock checks) is Phase 3.
-app = FastAPI(title="Bounded Agentic Checkout — Policy Gate (Phase 1 stub)")
+# Real decision logic as of Phase 3: /evaluate re-derives every decision
+# from merchant_rules.py, never trusts a number the seller agent hands it,
+# and never calls an LLM. This service has its own DB file, separate from
+# the backend's — that boundary is load-bearing, not cosmetic.
+Base.metadata.create_all(bind=engine)
+run_migrations()
+
+app = FastAPI(title="Bounded Agentic Checkout — Policy Gate")
 
 app.include_router(health.router)
+app.include_router(evaluate.router)
 
 
 @app.get("/")
