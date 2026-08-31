@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bounded Agentic Checkout</title>
+    <!-- Two-register type system: Fraunces (storefront display serif) +
+         Inter (shared body/UI sans) + JetBrains Mono (dashboard numeric/
+         log/audit data). See src/styles/{storefront,dashboard}-tokens.css. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Razorpay's hosted checkout widget — never build a custom card form (PCI scope). -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>

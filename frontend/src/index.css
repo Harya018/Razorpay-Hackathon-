@@ -1,3 +1,12 @@
+/* Two visual registers, deliberately not merged into one shared theme —
+   see each file's own rationale comment. Both load globally since Tailwind
+   utility classes from either palette can appear on any route; the actual
+   separation is enforced by which classes each component USES, not by
+   route-based CSS scoping. @import must precede all other rules, so these
+   come before @tailwind. */
+@import "./styles/storefront-tokens.css";
+@import "./styles/dashboard-tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
