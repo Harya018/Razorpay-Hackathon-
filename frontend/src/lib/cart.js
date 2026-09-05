@@ -21,6 +21,17 @@ function emptyCart() {
     negotiationProductId: null,
     negotiationProposedValue: null, // paise — the real gate-approved offer's total price
     negotiationDismissed: false, // Phase 10: user clicked "Dismiss" — stop resurfacing this session's popup
+    // Phase 20 — set once a negotiation actually reaches a real gate-approved
+    // handoff (NegotiationPanel's `handoff` state), so the discount survives
+    // past the popup itself: Cart.jsx reads these to show the negotiated
+    // price for the matching line and to redeem the SAME approval_token at
+    // checkout, instead of the negotiated price only ever existing inside
+    // the popup's own one-shot "Proceed to checkout" button.
+    negotiationAccepted: false,
+    negotiationAcceptedProductId: null,
+    negotiationApprovalToken: null,
+    negotiationCheckoutAmount: null, // paise — the real gate-approved total for this line
+    negotiationAcceptedSessionId: null,
   };
 }
 
@@ -66,6 +77,11 @@ export function addToCart(productId, quantity = 1) {
     cart.negotiationOpened = false;
     cart.negotiationProposedValue = null;
     cart.negotiationDismissed = false;
+    cart.negotiationAccepted = false;
+    cart.negotiationAcceptedProductId = null;
+    cart.negotiationApprovalToken = null;
+    cart.negotiationCheckoutAmount = null;
+    cart.negotiationAcceptedSessionId = null;
   }
 
   saveCart(cart);
@@ -127,6 +143,36 @@ export function markNegotiationOpened() {
 export function dismissNegotiation() {
   const cart = getCart();
   cart.negotiationDismissed = true;
+  saveCart(cart);
+  return cart;
+}
+
+// Called once NegotiationPanel's handoff actually happens — a REAL
+// gate-approved approval_token for a REAL final amount, not a client-side
+// guess. product_id is recorded so Cart.jsx only ever applies this to the
+// one line it actually belongs to.
+export function markNegotiationAccepted(productId, { approvalToken, checkoutAmount, sessionId }) {
+  const cart = getCart();
+  cart.negotiationAccepted = true;
+  cart.negotiationAcceptedProductId = productId;
+  cart.negotiationApprovalToken = approvalToken;
+  cart.negotiationCheckoutAmount = checkoutAmount;
+  cart.negotiationAcceptedSessionId = sessionId;
+  saveCart(cart);
+  return cart;
+}
+
+// Called once the accepted negotiation's approval_token has actually been
+// redeemed (a real order placed with it) — the token is single-use on the
+// backend regardless, but clearing this locally stops Cart.jsx from
+// continuing to show a price that's no longer honorable.
+export function clearNegotiationAccepted() {
+  const cart = getCart();
+  cart.negotiationAccepted = false;
+  cart.negotiationAcceptedProductId = null;
+  cart.negotiationApprovalToken = null;
+  cart.negotiationCheckoutAmount = null;
+  cart.negotiationAcceptedSessionId = null;
   saveCart(cart);
   return cart;
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { startCheckout } from "../lib/checkout.js";
+import { clearNegotiationAccepted, markNegotiationAccepted, removeFromCart } from "../lib/cart.js";
 import LiveBadge from "./LiveBadge.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -23,6 +25,7 @@ const AUDIT_POLL_MS = 2000;
 export default function NegotiationPanel({
   product,
   onClose,
+  onDone,
   onStatus,
   resumeSessionId = null,
   resumeMessage = null,
@@ -47,6 +50,20 @@ export default function NegotiationPanel({
   const auditListRef = useRef(null);
   const messagesEndRef = useRef(null);
   const autoAcceptSentRef = useRef(false);
+  const navigate = useNavigate();
+
+  // Phase 20: persist the accepted negotiation to cart state the MOMENT
+  // handoff actually happens — not only when/if the shopper clicks a
+  // specific button — so Cart.jsx shows the negotiated price for this
+  // line even if they just close the popup and go look at their cart
+  // themselves, rather than the discount only ever existing inside this
+  // one-shot panel.
+  useEffect(() => {
+    if (handoff && approvalToken) {
+      markNegotiationAccepted(product.id, { approvalToken, checkoutAmount, sessionId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handoff, approvalToken, checkoutAmount, sessionId]);
 
   useEffect(() => {
     if (resumeSessionId) {
@@ -164,10 +181,38 @@ export default function NegotiationPanel({
         approvalToken,
         sessionId,
         onStatus,
+        onClose: (paid) => {
+          if (!paid) return;
+          // The approval_token this line was showing is now redeemed —
+          // remove the line and the negotiated-price state so a second
+          // visit to the cart doesn't show a price that's no longer
+          // honorable (the backend would reject it anyway; this just
+          // keeps the UI honest about it too).
+          removeFromCart(product.id);
+          clearNegotiationAccepted();
+          onDone?.(); // nothing left for this popup to do — fully close it
+        },
       });
     } catch (err) {
       setError(err.message);
     }
+  }
+
+  // Phase 20: the alternative to checking out immediately from inside
+  // this popup — go look at the cart instead, where this same negotiated
+  // price (persisted above, the instant handoff happened) is now showing
+  // for this product's line, ready to check out from there whenever.
+  //
+  // Bug fixed Phase 20: this used to call onClose (minimize), which just
+  // collapsed the note back to its ORIGINAL pre-negotiation prompt —
+  // "Accept Offer" / "Not right now" — even though the deal was already
+  // done, since the collapsed view has no idea this panel ever reached
+  // handoff. Calling onDone (a full close, not a minimize) instead avoids
+  // resurfacing a stale, actively misleading prompt for an already-agreed
+  // negotiation.
+  function handleGoToCart() {
+    onDone?.();
+    navigate("/shop/cart");
   }
 
   return (
@@ -210,12 +255,23 @@ export default function NegotiationPanel({
             <p className="font-body text-sm font-semibold text-moss-dark">
               Offer accepted — final price ₹{((checkoutAmount ?? 0) / 100).toFixed(2)}
             </p>
-            <button
-              onClick={handleCheckout}
-              className="w-full rounded-sm bg-moss px-4 py-2 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-moss-dark"
-            >
-              Proceed to checkout
-            </button>
+            <p className="font-body text-xs text-moss-dark/80">
+              This price is already reflected in your cart — pay now, or check out from there whenever you're ready.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCheckout}
+                className="flex-1 rounded-sm bg-moss px-4 py-2 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-moss-dark"
+              >
+                Pay now
+              </button>
+              <button
+                onClick={handleGoToCart}
+                className="flex-1 rounded-sm border border-moss px-4 py-2 text-sm font-semibold text-moss-dark transition-colors hover:bg-moss-light/30"
+              >
+                Go to cart
+              </button>
+            </div>
           </div>
         ) : closed ? (
           <p className="font-body text-sm text-ink-soft">Negotiation ended ({offerStatus}).</p>

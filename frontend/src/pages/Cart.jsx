@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import RecommendationsRow from "../components/RecommendationsRow.jsx";
-import { clearCart, getCart, removeFromCart, updateQuantity } from "../lib/cart.js";
+import { clearCart, clearNegotiationAccepted, getCart, removeFromCart, updateQuantity } from "../lib/cart.js";
 import { startCheckout } from "../lib/checkout.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -31,11 +31,25 @@ export default function Cart() {
 
   if (loading) return <p className="font-body text-sm text-ink-soft">Loading cart...</p>;
 
+  // Phase 20: a line whose product matches an accepted negotiation
+  // (NegotiationPanel's real gate-approved handoff, persisted via
+  // markNegotiationAccepted) shows and charges that negotiated total
+  // instead of catalog price * quantity — the discount now survives past
+  // the popup itself instead of only working through its own one-shot
+  // "Proceed to checkout" button.
   const lines = cart.items
-    .map((item) => ({ item, product: products[item.productId] }))
+    .map((item) => {
+      const negotiated = cart.negotiationAccepted && cart.negotiationAcceptedProductId === item.productId;
+      return {
+        item,
+        product: products[item.productId],
+        negotiated,
+        lineTotal: negotiated ? cart.negotiationCheckoutAmount : products[item.productId]?.price * item.quantity,
+      };
+    })
     .filter((line) => line.product);
 
-  const subtotal = lines.reduce((sum, { item, product }) => sum + product.price * item.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
 
   if (lines.length === 0) {
     return (
@@ -79,12 +93,21 @@ export default function Cart() {
         await startCheckout({
           product: line.product,
           quantity: line.item.quantity,
+          // A negotiated line redeems the SAME real approval_token
+          // NegotiationPanel's handoff earned — the backend independently
+          // re-verifies it against the policy gate either way, this just
+          // means the discount actually applies here too, not only via
+          // the popup's own checkout button.
+          ...(line.negotiated
+            ? { approvalToken: cart.negotiationApprovalToken, sessionId: cart.negotiationAcceptedSessionId }
+            : {}),
           onStatus: setStatusMessage,
           onClose: (paid) => {
             if (!paid) {
               setCheckingOut(false);
               return;
             }
+            if (line.negotiated) clearNegotiationAccepted();
             removeFromCart(line.item.productId);
             next();
           },
@@ -109,10 +132,12 @@ export default function Cart() {
       )}
 
       <ul className="space-y-3">
-        {lines.map(({ item, product }) => (
+        {lines.map(({ item, product, negotiated, lineTotal }) => (
           <li
             key={item.productId}
-            className="flex items-center gap-4 rounded-md border border-putty-dark bg-ivory p-4"
+            className={`flex items-center gap-4 rounded-md border p-4 ${
+              negotiated ? "border-moss bg-moss-light/10" : "border-putty-dark bg-ivory"
+            }`}
           >
             <img
               src={product.image_urls?.[0]}
@@ -124,6 +149,9 @@ export default function Cart() {
                 {product.name}
               </Link>
               <p className="mt-0.5 font-body text-sm text-ink-soft">₹{(product.price / 100).toFixed(2)} each</p>
+              {negotiated && (
+                <p className="mt-0.5 font-body text-xs font-medium text-moss-dark">Negotiated price applied</p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -140,11 +168,21 @@ export default function Cart() {
                 +
               </button>
             </div>
-            <p className="w-24 shrink-0 text-right font-body text-sm font-semibold text-ink">
-              ₹{((product.price * item.quantity) / 100).toFixed(2)}
-            </p>
+            <div className="w-28 shrink-0 text-right">
+              {negotiated && (
+                <p className="font-body text-xs text-ink-soft/60 line-through">
+                  ₹{((product.price * item.quantity) / 100).toFixed(2)}
+                </p>
+              )}
+              <p className={`font-body text-sm font-semibold ${negotiated ? "text-moss-dark" : "text-ink"}`}>
+                ₹{(lineTotal / 100).toFixed(2)}
+              </p>
+            </div>
             <button
-              onClick={() => removeFromCart(item.productId)}
+              onClick={() => {
+                if (negotiated) clearNegotiationAccepted();
+                removeFromCart(item.productId);
+              }}
               className="shrink-0 font-body text-sm text-ink-soft/60 hover:text-rose-700"
             >
               Remove

@@ -51,7 +51,19 @@ export default function NegotiationNotification({ notification }) {
   const [product, setProduct] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [voiceOn, setVoiceOn] = useState(true);
+  // Bug fixed Phase 20: there was no way to fully close this popup once
+  // accepted/expanded — "Minimize" only ever collapsed it back to the
+  // small note, and "Not right now" (dismiss) only existed in the
+  // collapsed view. It could sit open, fixed on screen, indefinitely.
+  // This local flag hides it INSTANTLY on click, rather than waiting up
+  // to 5s for useCartAbandonment's next poll to notice
+  // negotiationDismissed and clear the `notification` prop itself.
+  const [manuallyClosed, setManuallyClosed] = useState(false);
   const spokenSessionRef = useRef(null);
+
+  useEffect(() => {
+    setManuallyClosed(false); // a new session (different sessionId) always starts visible
+  }, [notification?.sessionId]);
 
   useEffect(() => {
     if (!notification?.productId) return;
@@ -70,7 +82,7 @@ export default function NegotiationNotification({ notification }) {
 
   useEffect(() => stopSpeaking, []); // stop any speech if the component unmounts (route change, etc.)
 
-  if (!notification) return null;
+  if (!notification || manuallyClosed) return null;
 
   function toggleVoice() {
     setVoiceOn((v) => {
@@ -95,6 +107,17 @@ export default function NegotiationNotification({ notification }) {
   function handleDismiss() {
     stopSpeaking();
     dismissNegotiation();
+  }
+
+  // The general-purpose "I'm done looking at this" close — distinct from
+  // "Not right now" (which specifically declines the offer). Available in
+  // both the collapsed note and the expanded panel, including after a
+  // completed negotiation, so this never has to be left sitting open with
+  // no way out.
+  function handleClose() {
+    stopSpeaking();
+    dismissNegotiation();
+    setManuallyClosed(true);
   }
 
   const originalTotal = product ? product.price : null;
@@ -123,13 +146,18 @@ export default function NegotiationNotification({ notification }) {
 
           <div className="mb-2 flex items-center justify-between">
             <span className="font-display text-sm italic text-ink-soft">A note from Priya</span>
-            <button
-              onClick={toggleVoice}
-              title={voiceOn ? "Mute voice" : "Unmute voice"}
-              className="text-ink-soft/60 hover:text-ink-soft"
-            >
-              {voiceOn ? "🔊" : "🔇"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleVoice}
+                title={voiceOn ? "Mute voice" : "Unmute voice"}
+                className="text-ink-soft/60 hover:text-ink-soft"
+              >
+                {voiceOn ? "🔊" : "🔇"}
+              </button>
+              <button onClick={handleClose} title="Close" aria-label="Close" className="text-ink-soft/60 hover:text-ink-soft">
+                ✕
+              </button>
+            </div>
           </div>
 
           <button onClick={handleOpenChat} className="block w-full text-left">
@@ -185,6 +213,9 @@ export default function NegotiationNotification({ notification }) {
               <button onClick={() => setExpanded(false)} className="text-sm text-ink-soft/60 hover:text-ink-soft">
                 Minimize
               </button>
+              <button onClick={handleClose} title="Close" aria-label="Close" className="text-ink-soft/60 hover:text-ink-soft">
+                ✕
+              </button>
             </div>
           </div>
           <div className="max-h-[70vh] overflow-y-auto p-3">
@@ -199,6 +230,7 @@ export default function NegotiationNotification({ notification }) {
                 resumeSessionId={notification.sessionId}
                 resumeMessage={notification.message}
                 onClose={() => setExpanded(false)}
+                onDone={handleClose}
                 onStatus={setStatusMessage}
                 autoAccept={autoAccept}
                 compact
