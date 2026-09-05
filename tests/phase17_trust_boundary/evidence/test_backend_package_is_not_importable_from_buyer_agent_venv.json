@@ -5,8 +5,8 @@
   "steps": [
     {
       "label": "subprocess_import_attempt",
-      "ts": 1788160703.2253,
-      "ts_iso": "2026-08-31T12:48:23",
+      "ts": 1788610067.85457,
+      "ts_iso": "2026-09-05T17:37:47",
       "python": "C:\\Users\\harya\\OneDrive\\Desktop\\Razorpay Sep5\\buyer-agent\\.venv\\Scripts\\python.exe",
       "probe": "import sys; sys.path.insert(0, r'C:\\Users\\harya\\OneDrive\\Desktop\\Razorpay Sep5\\backend'); import app.gate_client",
       "returncode": 0,
@@ -15,8 +15,8 @@
     },
     {
       "label": "subprocess_import_attempt_no_path_hack",
-      "ts": 1788160703.3717418,
-      "ts_iso": "2026-08-31T12:48:23",
+      "ts": 1788610068.2219036,
+      "ts_iso": "2026-09-05T17:37:48",
       "probe": "import app.gate_client",
       "returncode": 1,
       "stdout": "",

@@ -5,8 +5,8 @@
   "steps": [
     {
       "label": "raw_sqlite_query",
-      "ts": 1788160630.7456648,
-      "ts_iso": "2026-08-31T12:47:10",
+      "ts": 1788610068.6201816,
+      "ts_iso": "2026-09-05T17:37:48",
       "db_path": "C:\\Users\\harya\\OneDrive\\Desktop\\Razorpay Sep5\\backend\\app.db",
       "sandbox_rows_in_audit_logs_table": 4,
       "note": "Queried directly against audit_logs \u2014 the SAME table dashboard_negotiations() reads for real sessions."

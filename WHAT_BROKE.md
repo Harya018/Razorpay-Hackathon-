@@ -275,7 +275,7 @@ this response even applies before trusting its contents," not the reverse.
 
 ---
 
-## 9. Phase 17 trust-boundary tests: Policy Gate trusts a caller-supplied price with zero independent verification (CRITICAL)
+## 9. Phase 17 trust-boundary tests: Policy Gate trusts a caller-supplied price with zero independent verification (CRITICAL, FIXED — Phase 20)
 
 **What broke:** `policy-gate/app/routes/evaluate.py`'s `POST /evaluate`
 is a public HTTP endpoint (port 8001) with **no caller authentication**
@@ -310,16 +310,46 @@ No internal code was called, no authentication was bypassed, no token
 was forged — this is two public, documented endpoints, called in the
 documented order, with one fabricated field in the first request.
 
-**Status: reported, not yet fixed**, per this test phase's own
-instruction to separate finding from fixing. The real fix is architectural,
-not a one-line patch — Policy Gate needs either (a) its own read access to
-authoritative product pricing (a synced/shared product table, or a
-read-only call back to the backend's own `/product/{id}`, itself
-requiring Policy Gate to stop trusting a client-supplied price
-altogether), or (b) network-level lockdown so `/evaluate`/`/verify` are
-only ever reachable from the backend's own process/network, never
-publicly — and probably both, since "not publicly reachable today" is a
-deployment fact, not a code guarantee.
+**Status: FIXED (Phase 20).** `policy-gate/app/routes/evaluate.py` now
+calls `GET {BACKEND_URL}/product/{id}` (a new `_fetch_real_unit_price`
+helper) before ever using the caller's `original_price` for anything,
+and rejects (`original_price_mismatch`) if it doesn't match the real
+catalog price — option (a) below. Option (b) (network-level lockdown so
+`/evaluate`/`/verify` are never publicly reachable at all) is still not
+done and remains a real, separate hardening step for an actual
+deployment, not just a local demo.
+
+**Closing verification, not just code review:** re-ran the exact live
+exploit test that found this
+(`tests/phase17_trust_boundary/test_17_3_price_tampering.py`) against
+the patched system. `test_fabricated_original_price_produces_valid_approval_token`
+now **PASSES** (fabricated price rejected, no token issued); the full
+exploit-chain test now **SKIPS** with "prerequisite not met" — there is
+no longer a token to redeem in the first place. The full
+`phase17_trust_boundary` suite was re-run afterward too, to check for
+regressions on the real, non-adversarial path — every real caller
+(backend's own negotiation and agent-commerce routes) already sends the
+true `product.price`, so this fix is a no-op for legitimate traffic.
+
+**A trade-off this fix honestly introduces:** `/evaluate` now has a
+real-time HTTP dependency on the backend being reachable, where it
+previously had none for this one field (fails CLOSED —
+`price_verification_unavailable` — if the backend can't be reached
+within 3s, rather than silently falling back to trusting the caller). In
+the normal application flow this changes nothing, since a request can
+only ever reach `/evaluate` in the first place via the backend, which
+must already be up to originate it — the new dependency only matters for
+the same out-of-band, direct-port-8001 access pattern that was the
+vulnerability itself. Documented here rather than left implicit.
+
+The original finding, preserved verbatim for the record — Policy Gate
+needs either (a) its own read access to authoritative product pricing (a
+synced/shared product table, or a read-only call back to the backend's
+own `/product/{id}`, itself requiring Policy Gate to stop trusting a
+client-supplied price altogether), or (b) network-level lockdown so
+`/evaluate`/`/verify` are only ever reachable from the backend's own
+process/network, never publicly — and probably both, since "not publicly
+reachable today" is a deployment fact, not a code guarantee.
 
 **Why it matters for a real payments system:** this is the specific
 failure mode the whole "separate, deterministic Policy Gate" architecture

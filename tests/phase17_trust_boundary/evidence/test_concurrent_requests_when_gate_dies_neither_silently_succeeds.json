@@ -5,20 +5,20 @@
   "steps": [
     {
       "label": "gate_killed_with_two_in_flight",
-      "ts": 1788161099.3880548,
-      "ts_iso": "2026-08-31T12:54:59",
-      "session_a": "phase17-delay-before-processing-concurrent-a-ad411372",
-      "session_b": "phase17-delay-before-processing-concurrent-b-27362fd0"
+      "ts": 1788610001.567775,
+      "ts_iso": "2026-09-05T17:36:41",
+      "session_a": "phase17-delay-before-processing-concurrent-a-75786e4b",
+      "session_b": "phase17-delay-before-processing-concurrent-b-50c36c24"
     },
     {
       "label": "concurrent_results",
-      "ts": 1788161099.3880548,
-      "ts_iso": "2026-08-31T12:54:59",
+      "ts": 1788610001.567775,
+      "ts_iso": "2026-09-05T17:36:41",
       "results": {
-        "b": {
+        "a": {
           "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
         },
-        "a": {
+        "b": {
           "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
         }
       }

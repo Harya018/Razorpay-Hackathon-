@@ -1,20 +1,20 @@
 {
   "test_id": "test_fabricated_original_price_produces_valid_approval_token",
-  "verdict": "FAIL",
+  "verdict": "PASS",
   "notes": "",
   "steps": [
     {
       "label": "fetch_real_price",
-      "ts": 1788160718.8114817,
-      "ts_iso": "2026-08-31T12:48:38",
+      "ts": 1788610011.417853,
+      "ts_iso": "2026-09-05T17:36:51",
       "product_id": 1,
       "real_price_paise": 249900,
       "product_name": "Hand-Painted Ceramic Table Vase"
     },
     {
       "label": "evaluate_with_fabricated_price",
-      "ts": 1788160718.825634,
-      "ts_iso": "2026-08-31T12:48:38",
+      "ts": 1788610011.835497,
+      "ts_iso": "2026-09-05T17:36:51",
       "request": {
         "original_price": 10000,
         "proposed_value": 9000,
@@ -22,14 +22,11 @@
       },
       "status_code": 200,
       "response": {
-        "approved": true,
-        "reason": null,
+        "approved": false,
+        "reason": "original_price_mismatch",
         "max_allowed": null,
-        "approval_token": "e0687205c488000500ec4e46b45a75572a5b5677a8d47912c3f2e12be40e9dec",
-        "final_terms": {
-          "type": "discount",
-          "value": 9000
-        }
+        "approval_token": null,
+        "final_terms": null
       }
     }
   ]

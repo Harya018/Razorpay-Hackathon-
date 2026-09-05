@@ -5,10 +5,10 @@
   "steps": [
     {
       "label": "real_chain_verify_before_tamper",
-      "ts": 1788160630.8071342,
-      "ts_iso": "2026-08-31T12:47:10",
+      "ts": 1788610069.0762665,
+      "ts_iso": "2026-09-05T17:37:49",
       "response": {
-        "chain_key": "session:agent-negotiate-9e4dbc4c-5f92-4072-b208-1bfd73fa8d41",
+        "chain_key": "session:agent-negotiate-b335dbdd-1d37-40b4-b0f5-1d025aac61eb",
         "valid": true,
         "total_rows": 2,
         "broken_at_row_id": null,
@@ -17,53 +17,53 @@
     },
     {
       "label": "sandbox_tamper",
-      "ts": 1788160630.9347322,
-      "ts_iso": "2026-08-31T12:47:10",
+      "ts": 1788610069.3038983,
+      "ts_iso": "2026-09-05T17:37:49",
       "response": {
         "chain_key": "session:demo:sandbox",
         "entries": [
           {
-            "id": 3200,
+            "id": 3411,
             "event_type": "demo_sandbox_entry",
-            "created_at": "2026-08-31T07:17:10.841066",
+            "created_at": "2026-09-05T12:07:49.120347",
             "order_id": null,
-            "entry_hash": "0e53e346039f910ecbb800efa3ba230a27d7c5e3ab4b261af6f7e791d74854ec",
-            "entry_hash_short": "0e53e346039f",
+            "entry_hash": "56e9ed5974632f5ed63343474e6dd07c749a839b74fb8551f0c30131de8f4e53",
+            "entry_hash_short": "56e9ed597463",
             "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
             "previous_hash_short": "000000000000",
             "summary": "Sandbox opened [TAMPERED]"
           },
           {
-            "id": 3201,
+            "id": 3412,
             "event_type": "demo_sandbox_entry",
-            "created_at": "2026-08-31T07:17:10.853027",
+            "created_at": "2026-09-05T12:07:49.148358",
             "order_id": null,
-            "entry_hash": "ae2891121045cbe8d6370f3487b35a0ecb644689301a547da53bfe07b3fe8c44",
-            "entry_hash_short": "ae2891121045",
-            "previous_hash": "0e53e346039f910ecbb800efa3ba230a27d7c5e3ab4b261af6f7e791d74854ec",
-            "previous_hash_short": "0e53e346039f",
+            "entry_hash": "eede7e154910bb41fdba033ca4f0675998494cdf1936af0592cdce8e0f78dbd0",
+            "entry_hash_short": "eede7e154910",
+            "previous_hash": "56e9ed5974632f5ed63343474e6dd07c749a839b74fb8551f0c30131de8f4e53",
+            "previous_hash_short": "56e9ed597463",
             "summary": "Sandbox offer proposed"
           },
           {
-            "id": 3202,
+            "id": 3413,
             "event_type": "demo_sandbox_entry",
-            "created_at": "2026-08-31T07:17:10.869264",
+            "created_at": "2026-09-05T12:07:49.170519",
             "order_id": null,
-            "entry_hash": "5202e429fd76758fb57b79229829eacecbc02b3d310c2a49df41bbec20ee6356",
-            "entry_hash_short": "5202e429fd76",
-            "previous_hash": "ae2891121045cbe8d6370f3487b35a0ecb644689301a547da53bfe07b3fe8c44",
-            "previous_hash_short": "ae2891121045",
+            "entry_hash": "de89774d77cff53aecc9b2bb392e0645e62b699e8d719e6ef308d3d5379e0659",
+            "entry_hash_short": "de89774d77cf",
+            "previous_hash": "eede7e154910bb41fdba033ca4f0675998494cdf1936af0592cdce8e0f78dbd0",
+            "previous_hash_short": "eede7e154910",
             "summary": "Sandbox offer accepted"
           },
           {
-            "id": 3203,
+            "id": 3414,
             "event_type": "demo_sandbox_entry",
-            "created_at": "2026-08-31T07:17:10.886233",
+            "created_at": "2026-09-05T12:07:49.210018",
             "order_id": null,
-            "entry_hash": "91451dc24cc34167498dbfbcfb83ad98241fbf8e580a5b52ccbc4937c1816350",
-            "entry_hash_short": "91451dc24cc3",
-            "previous_hash": "5202e429fd76758fb57b79229829eacecbc02b3d310c2a49df41bbec20ee6356",
-            "previous_hash_short": "5202e429fd76",
+            "entry_hash": "ab2d37af7bfe1fbb36aa68edc821ac3d04c31896991411a0bae7c8849f8e276d",
+            "entry_hash_short": "ab2d37af7bfe",
+            "previous_hash": "de89774d77cff53aecc9b2bb392e0645e62b699e8d719e6ef308d3d5379e0659",
+            "previous_hash_short": "de89774d77cf",
             "summary": "Sandbox order recorded"
           }
         ],
@@ -72,22 +72,22 @@
     },
     {
       "label": "sandbox_verify_after_tamper",
-      "ts": 1788160631.0010974,
-      "ts_iso": "2026-08-31T12:47:11",
+      "ts": 1788610069.470142,
+      "ts_iso": "2026-09-05T17:37:49",
       "response": {
         "chain_key": "session:demo:sandbox",
         "valid": false,
         "total_rows": 4,
-        "broken_at_row_id": 3200,
+        "broken_at_row_id": 3411,
         "reason": "entry_hash mismatch (tampered)"
       }
     },
     {
       "label": "real_chain_verify_after_tamper",
-      "ts": 1788160631.2030702,
-      "ts_iso": "2026-08-31T12:47:11",
+      "ts": 1788610069.870398,
+      "ts_iso": "2026-09-05T17:37:49",
       "response": {
-        "chain_key": "session:agent-negotiate-9e4dbc4c-5f92-4072-b208-1bfd73fa8d41",
+        "chain_key": "session:agent-negotiate-b335dbdd-1d37-40b4-b0f5-1d025aac61eb",
         "valid": true,
         "total_rows": 2,
         "broken_at_row_id": null,

@@ -4,6 +4,7 @@ import secrets
 import time
 from typing import Literal, Optional
 
+import httpx
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -14,6 +15,31 @@ from app.models.approval import Approval
 from app.rules import merchant_rules
 
 router = APIRouter()
+
+# WHAT_BROKE.md #9 — a short timeout so a hung/unreachable backend fails
+# an /evaluate call fast rather than hanging every negotiation turn. Fail
+# CLOSED on any failure (timeout, connection error, 404, malformed body):
+# this is the one field the whole gate's trust boundary depends on, so a
+# network hiccup must never silently fall back to trusting the caller.
+_PRICE_CHECK_TIMEOUT_SECONDS = 3.0
+
+
+def _fetch_real_unit_price(product_id: int) -> Optional[int]:
+    """The independent re-validation this endpoint never had: look up
+    what the product actually costs, from the one system that knows —
+    the backend's own catalog — instead of trusting whatever original_price
+    a caller of this public, unauthenticated endpoint claims. Returns None
+    on ANY failure (unreachable backend, unknown product, bad response) —
+    callers must treat None as "could not verify," never as "assume OK."
+    """
+    try:
+        resp = httpx.get(f"{settings.BACKEND_URL}/product/{product_id}", timeout=_PRICE_CHECK_TIMEOUT_SECONDS)
+        if resp.status_code != 200:
+            return None
+        price = resp.json().get("price")
+        return price if isinstance(price, int) else None
+    except httpx.HTTPError:
+        return None
 
 # Phase 17 trust-boundary test hooks — same pattern as buyer-agent's own
 # `force_aggressive_negotiation` test-mode flag: gated behind an env var
@@ -144,6 +170,18 @@ def evaluate(req: EvaluateRequest, db: Session = Depends(get_db)):
 
     if req.attempt_number > merchant_rules.MAX_ATTEMPTS:
         return _record_and_respond(db, req, "rejected", reason="attempt_cap_exceeded")
+
+    # WHAT_BROKE.md #9 fix: the caller's original_price is no longer taken
+    # on faith. Every REAL caller (backend's own negotiation/agent-commerce
+    # routes) already sends product.price fetched fresh from its own DB —
+    # this is a no-op for all legitimate traffic and only ever rejects a
+    # caller lying about what something costs, live-exploited pre-fix by
+    # tests/phase17_trust_boundary/test_17_3_price_tampering.py.
+    real_unit_price = _fetch_real_unit_price(req.product_id)
+    if real_unit_price is None:
+        return _record_and_respond(db, req, "rejected", reason="price_verification_unavailable")
+    if req.original_price != real_unit_price:
+        return _record_and_respond(db, req, "rejected", reason="original_price_mismatch")
 
     total_original = req.original_price * req.cart_quantity
     min_unit_price = merchant_rules.min_allowed_unit_price(req.product_id, req.original_price)
