@@ -20,7 +20,15 @@ function emptyCart() {
     negotiationOpened: false,
     negotiationProductId: null,
     negotiationProposedValue: null, // paise — the real gate-approved offer's total price
-    negotiationDismissed: false, // Phase 10: user clicked "Dismiss" — stop resurfacing this session's popup
+    // Bug fixed Phase 20: this cart used to negotiate about cart.items[0]
+    // ONLY, ever — once negotiationTriggered was true, EVERY later
+    // checkNow() just re-showed that same first product's session
+    // forever, so adding a second product to the cart never got its own
+    // offer at all. negotiationHandledProductIds tracks every product
+    // that has already had a negotiation attempt (dismissed OR accepted)
+    // for THIS cart's lifecycle, so useCartAbandonment can move on to the
+    // next distinct item instead of getting stuck on the first one.
+    negotiationHandledProductIds: [],
     // Phase 20 — set once a negotiation actually reaches a real gate-approved
     // handoff (NegotiationPanel's `handoff` state), so the discount survives
     // past the popup itself: Cart.jsx reads these to show the negotiated
@@ -76,7 +84,7 @@ export function addToCart(productId, quantity = 1) {
     cart.negotiationMessage = null;
     cart.negotiationOpened = false;
     cart.negotiationProposedValue = null;
-    cart.negotiationDismissed = false;
+    cart.negotiationHandledProductIds = [];
     cart.negotiationAccepted = false;
     cart.negotiationAcceptedProductId = null;
     cart.negotiationApprovalToken = null;
@@ -136,13 +144,35 @@ export function markNegotiationOpened() {
   return cart;
 }
 
+// Marks a product's negotiation as RESOLVED — declined, accepted, or
+// otherwise concluded — so it's never re-offered again (organically) for
+// this cart, and clears the "currently pending" session fields so
+// useCartAbandonment is free to consider the next distinct cart item.
+// Shared by dismissNegotiation and markNegotiationAccepted below; not
+// exported on its own since every caller means one of those two things.
+function resolveNegotiation(cart, productId) {
+  if (productId != null && !cart.negotiationHandledProductIds.includes(productId)) {
+    cart.negotiationHandledProductIds = [...cart.negotiationHandledProductIds, productId];
+  }
+  cart.negotiationTriggered = false;
+  cart.negotiationSessionId = null;
+  cart.negotiationMessage = null;
+  cart.negotiationProductId = null;
+  cart.negotiationProposedValue = null;
+  cart.negotiationOpened = false;
+  return cart;
+}
+
 // "Dismiss" on the popup — per Phase 10's spec, this keeps the original
-// price and stops the popup from resurfacing for this cart/session. It
-// does NOT clear negotiationSessionId/Message — the real negotiation
-// session on the backend is untouched, just no longer surfaced in the UI.
+// price for this product and stops IT specifically from resurfacing. Bug
+// fixed Phase 20: this used to just set a cart-wide negotiationDismissed
+// flag that silenced the popup forever, for every product, for the rest
+// of this cart's lifecycle. Now it resolves only the product that was
+// actually declined — a different item added afterward still gets its
+// own real shot at a negotiation.
 export function dismissNegotiation() {
   const cart = getCart();
-  cart.negotiationDismissed = true;
+  resolveNegotiation(cart, cart.negotiationProductId);
   saveCart(cart);
   return cart;
 }
@@ -150,9 +180,12 @@ export function dismissNegotiation() {
 // Called once NegotiationPanel's handoff actually happens — a REAL
 // gate-approved approval_token for a REAL final amount, not a client-side
 // guess. product_id is recorded so Cart.jsx only ever applies this to the
-// one line it actually belongs to.
+// one line it actually belongs to. Also resolves this product's pending
+// negotiation (same as a dismiss, just accepted instead of declined) so a
+// different cart item is free to get its own offer.
 export function markNegotiationAccepted(productId, { approvalToken, checkoutAmount, sessionId }) {
   const cart = getCart();
+  resolveNegotiation(cart, productId);
   cart.negotiationAccepted = true;
   cart.negotiationAcceptedProductId = productId;
   cart.negotiationApprovalToken = approvalToken;
@@ -173,17 +206,6 @@ export function clearNegotiationAccepted() {
   cart.negotiationApprovalToken = null;
   cart.negotiationCheckoutAmount = null;
   cart.negotiationAcceptedSessionId = null;
-  saveCart(cart);
-  return cart;
-}
-
-// Used only by the "simulate leaving and returning" demo overlay's forced
-// re-check (useCartAbandonment's forceCheck) — lets that demo affordance
-// resurface an already-dismissed popup on demand, without touching the
-// real once-dismissed-stays-dismissed behavior for an organic abandonment.
-export function undismissNegotiation() {
-  const cart = getCart();
-  cart.negotiationDismissed = false;
   saveCart(cart);
   return cart;
 }

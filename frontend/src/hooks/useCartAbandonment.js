@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { getCart, markNegotiationTriggered, undismissNegotiation } from "../lib/cart.js";
+import { getCart, markNegotiationTriggered } from "../lib/cart.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const THRESHOLD_SECONDS = Number(import.meta.env.VITE_CART_ABANDONMENT_THRESHOLD_SECONDS ?? 45);
@@ -35,24 +35,16 @@ export default function useCartAbandonment() {
   // `force` is only ever true from the "simulate leaving and returning"
   // demo overlay (see forceCheck below) — it exists so that explicit demo
   // affordance reliably reproduces the popup every time it's used, rather
-  // than being subject to the same once-dismissed-stays-dismissed and
-  // real-elapsed-time gating an organic cart abandonment goes through.
+  // than being subject to the real elapsed-time gating an organic cart
+  // abandonment goes through.
   const checkNow = useCallback(async (force = false) => {
     const cart = getCart();
     if (cart.items.length === 0) return;
 
-    if (cart.negotiationDismissed) {
-      if (!force) {
-        setNotification(null);
-        return;
-      }
-      undismissNegotiation();
-    }
-
     if (cart.negotiationTriggered) {
-      // Already fired (possibly on an earlier page load) — just make sure
-      // the notification is showing; never call /negotiate/start again
-      // for this cart.
+      // Already fired for SOME product (possibly on an earlier page load)
+      // — just make sure the notification is showing; never call
+      // /negotiate/start a second time while one is already pending.
       if (cart.negotiationSessionId) {
         setNotification({
           sessionId: cart.negotiationSessionId,
@@ -64,6 +56,33 @@ export default function useCartAbandonment() {
       return;
     }
 
+    // Bug fixed Phase 20: this used to always negotiate about
+    // cart.items[0] — the very FIRST product ever added — and, since
+    // negotiationTriggered never cleared once set, every later item added
+    // to the cart never got its own negotiation at all. Target the most
+    // recently added item that hasn't already had one (dismissed or
+    // accepted both count as "handled" — see resolveNegotiation in
+    // cart.js), so each new product gets its own real shot.
+    // `force` is a demo-only cheat: always re-target the newest item
+    // regardless of history, so the "simulate leaving and returning"
+    // button reliably reproduces a popup on demand even for a product
+    // already negotiated this session.
+    const handled = new Set(cart.negotiationHandledProductIds);
+    const target = force
+      ? [...cart.items].reverse()[0]
+      : [...cart.items].reverse().find((i) => !handled.has(i.productId));
+    // Bug fixed Phase 20: this used to setNotification(null) here, which
+    // — now that resolveNegotiation clears negotiationTriggered the
+    // instant a negotiation is ACCEPTED, not just dismissed — meant the
+    // very next 5s background poll could unmount NegotiationNotification
+    // entirely while the handoff view ("Pay now" / "Go to cart") was
+    // still on screen, mid-interaction, with nothing new to negotiate
+    // about yet. This hook only ever STARTS a notification now; hiding
+    // an already-shown one is owned entirely by the component's own
+    // local dismiss state (NegotiationNotification's manuallyClosed),
+    // triggered by an explicit user action, never a background poll.
+    if (!target) return;
+
     if (!force) {
       if (!cart.lastActivityAt) return;
       const elapsedSeconds = (Date.now() - cart.lastActivityAt) / 1000;
@@ -73,22 +92,17 @@ export default function useCartAbandonment() {
     if (_negotiateStartInFlight) return; // see module-level note above
     _negotiateStartInFlight = true;
 
-    // Cart has sat untouched past the threshold and we haven't triggered
-    // yet for it — negotiate about the first item added (a cart-level
-    // negotiation, one session at a time, matches the seller's per-product
-    // negotiation endpoint).
-    const firstItem = cart.items[0];
     try {
       const res = await fetch(`${API_BASE_URL}/negotiate/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_id: firstItem.productId, cart_quantity: firstItem.quantity }),
+        body: JSON.stringify({ product_id: target.productId, cart_quantity: target.quantity }),
       });
       if (!res.ok) return;
       const data = await res.json();
       const proposedValue = data.proposed_offer?.value ?? null;
-      markNegotiationTriggered(data.session_id, data.message, firstItem.productId, proposedValue);
-      setNotification({ sessionId: data.session_id, message: data.message, productId: firstItem.productId, proposedValue });
+      markNegotiationTriggered(data.session_id, data.message, target.productId, proposedValue);
+      setNotification({ sessionId: data.session_id, message: data.message, productId: target.productId, proposedValue });
     } catch {
       // Best-effort — cart.negotiationTriggered stays false, so this is
       // retried on the next tick / next app load rather than lost.

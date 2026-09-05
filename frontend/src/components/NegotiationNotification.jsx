@@ -107,6 +107,13 @@ export default function NegotiationNotification({ notification }) {
   function handleDismiss() {
     stopSpeaking();
     dismissNegotiation();
+    // Bug fixed Phase 20: this used to rely on the next background poll
+    // (up to 5s later) noticing the dismissal and clearing the parent's
+    // `notification` prop to hide this popup. That poll no longer ever
+    // clears an already-shown notification (see useCartAbandonment's own
+    // fix) — so "Not right now" hides itself instantly the same way the
+    // close button does, instead of visibly lingering for a few seconds.
+    setManuallyClosed(true);
   }
 
   // The general-purpose "I'm done looking at this" close — distinct from
