@@ -1,8 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 
 function tabClass({ isActive }) {
-  return `rounded-sm px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide transition-colors ${
-    isActive ? "bg-content text-panel" : "text-slate-400 hover:text-slate-100"
+  return `rounded-lg px-3 py-1.5 font-body text-sm font-medium transition-colors ${
+    isActive ? "bg-clay text-ivory shadow-sm" : "text-ink-soft hover:bg-putty-light hover:text-ink"
   }`;
 }
 
@@ -12,19 +12,21 @@ function tabClass({ isActive }) {
 // merchant already on one sub-page jump straight to the other, not just
 // back to Overview first.
 //
-// Register 2 shell (Phase 16 design pass): a dark slate instrument
-// housing around light "screen" content panels — see
-// src/styles/dashboard-tokens.css for the full rationale. Deliberately
-// does NOT borrow the storefront's warmth; this is Priya's shop's
-// infrastructure, not the shop itself.
+// Phase 19 shell rebuild: moved from the Phase 16 dark-slate "instrument
+// panel" shell to the same light cream/warm-brown family as the
+// storefront, per this pass's explicit direction — the whole app should
+// read as one product now, not two registers. The deterministic-vs-LLM
+// color coding and the Audit Trail panel's own terminal/mono styling are
+// UNCHANGED — this file only restyles its own shell chrome (the tab bar
+// and background), never the panels rendered inside it.
 export default function DashboardLayout() {
   return (
-    <div className="min-h-[calc(100vh-57px)] bg-panel">
-      <div className="border-b border-white/10 px-6 py-3">
-        <p className="font-mono text-[11px] uppercase tracking-widest text-slate-500">Merchant Operations</p>
+    <div className="min-h-screen bg-ivory">
+      <div className="border-b border-putty-dark px-6 py-3">
+        <p className="font-body text-[11px] font-medium uppercase tracking-widest text-ink-soft/70">Merchant Operations</p>
       </div>
       <div className="p-6">
-        <div className="mb-5 inline-flex gap-1 rounded-sm border border-white/10 bg-panel-raised p-1">
+        <div className="mb-5 inline-flex gap-1 rounded-xl border border-putty-dark bg-white p-1 shadow-sm">
           <NavLink to="/dashboard" end className={tabClass}>
             Overview
           </NavLink>

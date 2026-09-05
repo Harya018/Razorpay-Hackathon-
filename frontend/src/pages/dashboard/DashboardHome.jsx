@@ -46,11 +46,11 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-100">Merchant Dashboard</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink">Merchant Dashboard</h1>
         {connected ? (
           <LiveBadge color="emerald" label="Live" />
         ) : (
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-slate-400">connecting...</span>
+          <span className="rounded-full bg-putty-light px-2 py-0.5 font-body text-xs font-medium text-ink-soft">connecting...</span>
         )}
       </div>
 

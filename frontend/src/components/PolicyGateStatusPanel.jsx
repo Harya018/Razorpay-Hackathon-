@@ -5,14 +5,15 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Polls every 2s specifically so this panel visibly flips to unreachable
 // within 2-3 seconds of the policy-gate process actually going down (the
 // Phase 14 demo beat) — each poll is a LIVE ping timed by the backend
-// right then, never a cached/last-known value.
+// right then, never a cached/last-known value. Polling logic unchanged
+// by the Phase 19 restyle — only the JSX/classes below changed.
 const POLL_MS = 2000;
 
 function Stat({ label, value }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="font-mono text-sm font-semibold text-slate-800">{value}</p>
+      <p className="font-body text-[10px] uppercase tracking-wide text-ink-soft/70">{label}</p>
+      <p className="font-body text-sm font-semibold text-ink">{value}</p>
     </div>
   );
 }
@@ -41,24 +42,28 @@ export default function PolicyGateStatusPanel() {
     };
   }, []);
 
-  if (!status) return <p className="font-mono text-sm text-slate-400">Checking policy-gate...</p>;
+  if (!status) return <p className="font-body text-sm text-ink-soft">Checking policy-gate...</p>;
 
   const reachable = status.reachable;
 
   return (
-    <div className={`border p-4 transition-colors ${reachable ? "border-slate-300 bg-content" : "border-rose-500 bg-rose-50"}`}>
+    <div
+      className={`rounded-2xl border p-4 shadow-sm transition-colors sm:p-5 ${
+        reachable ? "border-putty-dark bg-white" : "border-rose-400 bg-rose-50"
+      }`}
+    >
       <div className="flex items-center justify-between">
-        <h2 className="font-mono text-xs font-semibold uppercase tracking-wide text-slate-500">Policy Gate Status</h2>
+        <h2 className="font-body text-xs font-semibold uppercase tracking-wide text-ink-soft">Policy Gate Status</h2>
         <span
-          className={`flex items-center gap-1.5 rounded-sm px-2 py-0.5 font-mono text-[11px] font-semibold ${
-            reachable ? "bg-emerald-100 text-emerald-800" : "bg-rose-600 text-white"
+          className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 font-body text-[11px] font-semibold ${
+            reachable ? "bg-moss-light/25 text-moss-dark" : "bg-rose-600 text-white"
           }`}
         >
-          <span className={`h-1.5 w-1.5 rounded-full ${reachable ? "bg-emerald-500" : "bg-white"}`} />
+          <span className={`h-1.5 w-1.5 rounded-full ${reachable ? "bg-moss" : "bg-white"}`} />
           {reachable ? "Healthy" : "Unreachable"}
         </span>
       </div>
-      <p className="mt-0.5 font-mono text-[10px] text-slate-400">
+      <p className="mt-0.5 font-body text-[10px] text-ink-soft/70">
         Separate deployable service, own DB — polled directly every {POLL_MS / 1000}s, not proxied through anything else.
       </p>
 

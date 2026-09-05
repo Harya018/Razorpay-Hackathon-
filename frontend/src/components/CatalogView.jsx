@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import CardShell from "./Card.jsx";
 import { startCheckout } from "../lib/checkout.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -46,6 +47,9 @@ export default function CatalogView() {
   if (loading) return <p className="font-body text-sm text-ink-soft">Loading catalog...</p>;
   if (error) return <p className="font-body text-sm text-rose-700">{error}</p>;
 
+  // Phase 19: rows became cards (grid, not a stacked list) — same data,
+  // same Buy handler/disabled logic, same stock/price display, just
+  // laid out in the shared light-card family instead of a plain list.
   // Deliberately plainer than the shop's own ProductCard grid — this is
   // an internal tool, not a customer-facing surface — but it shares the
   // shop's actual identity (ivory/putty/clay/ink, serif name + plain sans
@@ -53,45 +57,39 @@ export default function CatalogView() {
   return (
     <div>
       {statusMessage && (
-        <p className="mb-4 inline-block rounded-sm border border-moss-light bg-moss-light/20 px-3 py-2 font-body text-sm font-medium text-moss-dark">
+        <p className="mb-4 inline-block rounded-full border border-moss-light bg-moss-light/20 px-3 py-2 font-body text-sm font-medium text-moss-dark">
           {statusMessage}
         </p>
       )}
-      <ul className="space-y-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {products.map((product) => {
           const inStock = product.stock > 0;
           return (
-            <li key={product.id} className="rounded-md border border-putty-dark bg-ivory p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-display text-lg font-medium text-ink">{product.name}</p>
-                    {product.negotiable && (
-                      <span className="shrink-0 rounded-full bg-moss-light/25 px-2 py-0.5 font-body text-xs font-medium uppercase tracking-wide text-moss-dark">
-                        Negotiable
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <p className="font-body text-2xl font-bold text-ink">₹{(product.price / 100).toFixed(2)}</p>
-                    <p className="font-body text-sm text-ink-soft/60">stock: {product.stock}</p>
-                  </div>
-                  {product.description && <p className="mt-1 font-body text-sm text-ink-soft">{product.description}</p>}
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <button
-                    onClick={() => handleBuy(product)}
-                    disabled={!inStock || checkingOutId === product.id}
-                    className="rounded-sm bg-clay px-5 py-2 font-body text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-clay-dark disabled:bg-putty disabled:text-ink-soft/50"
-                  >
-                    {checkingOutId === product.id ? "Opening..." : "Buy"}
-                  </button>
-                </div>
+            <CardShell key={product.id} className="flex flex-col">
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-display text-lg font-medium text-ink">{product.name}</p>
+                {product.negotiable && (
+                  <span className="shrink-0 rounded-full bg-moss-light/25 px-2 py-0.5 font-body text-[10px] font-medium uppercase tracking-wide text-moss-dark">
+                    Negotiable
+                  </span>
+                )}
               </div>
-            </li>
+              <div className="mt-1 flex items-baseline gap-2">
+                <p className="font-body text-2xl font-bold text-ink">₹{(product.price / 100).toFixed(2)}</p>
+                <p className="font-body text-sm text-ink-soft/60">stock: {product.stock}</p>
+              </div>
+              {product.description && <p className="mt-1 font-body text-sm text-ink-soft">{product.description}</p>}
+              <button
+                onClick={() => handleBuy(product)}
+                disabled={!inStock || checkingOutId === product.id}
+                className="mt-3 rounded-lg bg-clay px-5 py-2 font-body text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-clay-dark disabled:bg-putty disabled:text-ink-soft/50"
+              >
+                {checkingOutId === product.id ? "Opening..." : "Buy"}
+              </button>
+            </CardShell>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 }
