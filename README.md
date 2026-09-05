@@ -8,6 +8,49 @@ the storefront persona; the Merchant Dashboard and Sales Analytics pages
 are where the architecture itself — bounded, gated, audited — is made
 visible.
 
+## What this actually is
+
+The thesis: an LLM is good at *framing* a negotiation (reading intent,
+staying in character, deciding when to make an offer) but should never
+be the thing that decides whether a discount is real. So this project
+splits those two jobs into separate services. A seller agent and a buyer
+agent (both LangGraph, both LLM-driven) can talk, haggle, and reach a
+deal — but the deal only becomes real money if a completely separate,
+zero-LLM **Policy Gate** independently approves it against the
+merchant's own rules. The same gate sits in the path whether the
+counterparty across the table is a human shopper on the storefront or
+another company's autonomous buyer agent calling the public
+`/agent/v1/*` API.
+
+Everything downstream of that idea is built to make the boundary
+*checkable*, not just claimed: a hash-chained, tamper-evident audit log
+for every negotiation and order; a live Merchant Dashboard that shows
+the gate's own decisions in real time; two independent red-team suites
+run against the actual running services (not mocked); and `WHAT_BROKE.md`,
+a plain account of every real bug this build found in itself — including
+one critical pricing-trust exploit that was demonstrated live, then
+fixed, then re-verified by re-running the exact exploit test against the
+patched system.
+
+## Screenshots
+
+**Priya's Shop** — the storefront. Every product is negotiable; a
+shopper can also just buy at the listed price.
+
+![Storefront](docs/screenshots/shop.png)
+
+**Merchant Dashboard** — live sales, a self-verifying hash-chain audit
+trail, live Policy Gate health, a live map of every agent-to-agent
+negotiation, and this build's own red-team scorecard, all on one page.
+
+![Merchant Dashboard](docs/screenshots/merchant-dashboard.png)
+
+**Sales Analytics** — trends computed from real order and negotiation
+history, with simulated figures (like the recovery-rate estimate)
+labeled as exactly that, never blended in as if they were measured.
+
+![Sales Analytics](docs/screenshots/sales-analytics.png)
+
 This README covers getting all **four services** running from a clean
 checkout. If you hit something not covered here, that's a real gap —
 see "Known Gotchas" below, and please add to it.
