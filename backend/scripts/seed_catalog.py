@@ -26,18 +26,29 @@ order history intact. Every other pre-existing SKU (the rest of the old
 electronics/footwear/fitness/stationery set) is deleted at the end of
 seed() since nothing outside this file depends on those rows.
 
-Images: every product's image is a small SVG generated at seed time from
-the product's own name + a category emoji, base64-encoded into a data:
-URI. This intentionally is NOT hotlinked stock photography — an earlier
-version of this file tried keyword-tagged stock photo services and hit
-real name/image mismatches (unrelated photos, even a real Nike logo on a
-non-Nike product) — not something to put in a merchant demo. Every image
-here shares ONE consistent illustrated treatment (a warm ivory/putty
-gradient matching the storefront's own token palette, a hand-stamped
-dashed ring, the product's emoji, and its name set in a serif caption)
-instead of a different flat background color per item, so the catalog
-reads as one shop's own consistent product photography style rather than
-a grid of mismatched colored swatches.
+Images: the generated SVG placeholder (small illustration made at seed
+time from the product's own name + a category emoji, base64-encoded into
+a data: URI — see _placeholder_svg below) was the original approach here,
+specifically to avoid keyword-tagged stock photo mismatches (an earlier
+version of this file hit real ones, including a real Nike logo on a
+non-Nike product).
+
+Phase 20: 11 of these 12 products were switched to a real downloaded
+photo (frontend/public/images/products/*.jpg) instead, each one manually
+vetted against its own listing text before being wired in — several
+keyword-search candidates were rejected first (a mug with a printed
+brand logo, a ritual brass vessel, a novelty animal-shaped planter stand,
+a full dinner table with a wine decanter hiding the runner's actual
+print, an antique brass ewer). "Brass Hand-Etched Planter Pot" never
+found a clean match after five search rounds (~15 candidates, all either
+ritual vessels, novelty shapes, or the wrong object entirely) and was
+left on the original generated SVG rather than shipping a mismatch — so
+this file, and this catalog, intentionally mixes both image sources. If
+a future pass wants to replace that last one, re-run the same vetting
+standard rather than taking the first keyword hit. (The table runner's
+real photo is a floral tapestry pattern, not literally block-print, but
+it's a genuine table runner shown in full use — the closest available
+compromise after its own two failed rounds.)
 """
 
 import base64
@@ -105,7 +116,7 @@ PRODUCTS = [
             "alike, so the one you receive is genuinely one-of-a-kind. Glazed finish, food-safe if you'd "
             "like to use it for dried or fresh stems. Roughly 32cm tall."
         ),
-        "image_urls": placeholder_images("🏺", "Hand-Painted Ceramic Table Vase", 3),
+        "image_urls": ["/images/products/ceramic-vase.jpg"],
         "rating": 4.4,
         "review_count": 312,
         "negotiable": True,
@@ -128,7 +139,7 @@ PRODUCTS = [
             "color shifts subtly across the surface. Comfortable handle, microwave and dishwasher safe. "
             "Sold individually — mix and match glazes for a set that doesn't look mass-produced."
         ),
-        "image_urls": placeholder_images("☕", "Hand-Thrown Stoneware Mug", 2),
+        "image_urls": ["/images/products/stoneware-mug.jpg"],
         "rating": 4.6,
         "review_count": 98,
         "negotiable": True,
@@ -150,7 +161,7 @@ PRODUCTS = [
             "Roomy enough for throws, toys, or plant pots — doubles as floor decor even when empty. "
             "Roughly 40cm diameter x 35cm tall."
         ),
-        "image_urls": placeholder_images("🧺", "Handwoven Jute Storage Basket", 4),
+        "image_urls": ["/images/products/jute-basket.jpg"],
         "rating": 4.3,
         "review_count": 187,
         "negotiable": True,
@@ -171,7 +182,7 @@ PRODUCTS = [
             "A hand-knotted macrame wall hanging in a diamond lattice pattern, made from natural cotton "
             "cord on a wooden dowel — ready to hang straight out of the box. Roughly 60cm wide x 90cm long."
         ),
-        "image_urls": placeholder_images("🪢", "Macrame Wall Hanging", 3),
+        "image_urls": ["/images/products/macrame.jpg"],
         "rating": 4.7,
         "review_count": 96,
         "negotiable": True,
@@ -191,7 +202,7 @@ PRODUCTS = [
             "A 16x16in cotton cushion cover finished with traditional hand kantha running-stitch "
             "embroidery. Hidden zip closure, machine washable on gentle cycle. Insert sold separately."
         ),
-        "image_urls": placeholder_images("🧵", "Embroidered Cushion Cover", 2),
+        "image_urls": ["/images/products/cushion.jpg"],
         "rating": 4.5,
         "review_count": 141,
         "negotiable": True,
@@ -210,7 +221,7 @@ PRODUCTS = [
             "A cotton table runner hand block-printed with a traditional floral motif, 13in x 72in. "
             "Pre-washed to reduce shrinkage; a gentle iron brings the print back to crisp after washing."
         ),
-        "image_urls": placeholder_images("🧶", "Block-Print Table Runner", 2),
+        "image_urls": ["/images/products/table-runner.jpg"],
         "rating": 4.4,
         "review_count": 58,
         "negotiable": False,
@@ -230,7 +241,7 @@ PRODUCTS = [
             "A hand-thrown terracotta planter, 8in diameter, with a drainage hole and matching saucer "
             "included. Unglazed exterior lets the clay breathe, which most houseplants prefer."
         ),
-        "image_urls": placeholder_images("🪴", "Terracotta Planter", 3),
+        "image_urls": ["/images/products/terracotta-planter.jpg"],
         "rating": 4.5,
         "review_count": 203,
         "negotiable": True,
@@ -271,7 +282,7 @@ PRODUCTS = [
             "A set of 4 live-edge mango wood coasters, each with a slightly different grain since the wood "
             "is never cut from the same section twice. Finished with a food-safe oil, wipes clean easily."
         ),
-        "image_urls": placeholder_images("🪵", "Wooden Coasters Set", 2),
+        "image_urls": ["/images/products/wooden-coasters.jpg"],
         "rating": 4.4,
         "review_count": 112,
         "negotiable": True,
@@ -291,7 +302,7 @@ PRODUCTS = [
             "carrying. Great for breakfast in bed, chai service, or as a styled coffee-table catch-all. "
             "Roughly 40cm x 28cm."
         ),
-        "image_urls": placeholder_images("🍽️", "Hand-Painted Wooden Serving Tray", 3),
+        "image_urls": ["/images/products/wooden-tray.jpg"],
         "rating": 4.7,
         "review_count": 84,
         "negotiable": True,
@@ -312,7 +323,7 @@ PRODUCTS = [
             "A hand-poured soy wax candle in a reusable ceramic vessel, scented with sandalwood. Cotton "
             "wick, roughly 40 hours of burn time. Once finished, the vessel makes a nice small planter."
         ),
-        "image_urls": placeholder_images("🕯️", "Hand-Poured Soy Candle", 2),
+        "image_urls": ["/images/products/soy-candle.jpg"],
         "rating": 4.6,
         "review_count": 154,
         "negotiable": True,
@@ -331,7 +342,7 @@ PRODUCTS = [
             "A handwoven rattan pendant lamp shade that casts a warm, dappled light pattern. Fits standard "
             "E27 pendant fittings (fitting/cord sold separately). Roughly 35cm diameter."
         ),
-        "image_urls": placeholder_images("💡", "Rattan Pendant Lamp Shade", 3),
+        "image_urls": ["/images/products/rattan-lamp.jpg"],
         "rating": 4.3,
         "review_count": 71,
         "negotiable": False,
@@ -351,8 +362,18 @@ def seed():
         touched_ids = set()
         for raw in PRODUCTS:
             data = dict(raw)
-            lookup_name = data.pop("match_name", None) or data["name"]
-            existing = db.query(Product).filter(Product.name == lookup_name).first()
+            old_name = data.pop("match_name", None)
+            # Bug fixed Phase 20: a match_name lookup only ever finds the
+            # OLD name, so a second run (after the first already renamed
+            # the row) found nothing, created a duplicate with a fresh ID,
+            # and deleted the real row — silently orphaning every order's
+            # product_id FK. Falling back to the current `name` makes the
+            # match_name lookup idempotent across repeat runs.
+            existing = None
+            if old_name:
+                existing = db.query(Product).filter(Product.name == old_name).first()
+            if existing is None:
+                existing = db.query(Product).filter(Product.name == data["name"]).first()
             if existing:
                 for key, value in data.items():
                     setattr(existing, key, value)

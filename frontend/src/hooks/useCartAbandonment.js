@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { getCart, markNegotiationTriggered } from "../lib/cart.js";
+import { getCart, markNegotiationTriggered, undismissNegotiation } from "../lib/cart.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const THRESHOLD_SECONDS = Number(import.meta.env.VITE_CART_ABANDONMENT_THRESHOLD_SECONDS ?? 45);
@@ -32,13 +32,21 @@ let _negotiateStartInFlight = false;
 export default function useCartAbandonment() {
   const [notification, setNotification] = useState(null); // { sessionId, message, productId, proposedValue } | null
 
-  const checkNow = useCallback(async () => {
+  // `force` is only ever true from the "simulate leaving and returning"
+  // demo overlay (see forceCheck below) — it exists so that explicit demo
+  // affordance reliably reproduces the popup every time it's used, rather
+  // than being subject to the same once-dismissed-stays-dismissed and
+  // real-elapsed-time gating an organic cart abandonment goes through.
+  const checkNow = useCallback(async (force = false) => {
     const cart = getCart();
     if (cart.items.length === 0) return;
 
     if (cart.negotiationDismissed) {
-      setNotification(null);
-      return;
+      if (!force) {
+        setNotification(null);
+        return;
+      }
+      undismissNegotiation();
     }
 
     if (cart.negotiationTriggered) {
@@ -46,23 +54,21 @@ export default function useCartAbandonment() {
       // the notification is showing; never call /negotiate/start again
       // for this cart.
       if (cart.negotiationSessionId) {
-        setNotification((prev) =>
-          prev?.sessionId === cart.negotiationSessionId
-            ? prev
-            : {
-                sessionId: cart.negotiationSessionId,
-                message: cart.negotiationMessage,
-                productId: cart.negotiationProductId,
-                proposedValue: cart.negotiationProposedValue,
-              }
-        );
+        setNotification({
+          sessionId: cart.negotiationSessionId,
+          message: cart.negotiationMessage,
+          productId: cart.negotiationProductId,
+          proposedValue: cart.negotiationProposedValue,
+        });
       }
       return;
     }
 
-    if (!cart.lastActivityAt) return;
-    const elapsedSeconds = (Date.now() - cart.lastActivityAt) / 1000;
-    if (elapsedSeconds < THRESHOLD_SECONDS) return;
+    if (!force) {
+      if (!cart.lastActivityAt) return;
+      const elapsedSeconds = (Date.now() - cart.lastActivityAt) / 1000;
+      if (elapsedSeconds < THRESHOLD_SECONDS) return;
+    }
 
     if (_negotiateStartInFlight) return; // see module-level note above
     _negotiateStartInFlight = true;
@@ -97,5 +103,7 @@ export default function useCartAbandonment() {
     return () => clearInterval(interval);
   }, [checkNow]);
 
-  return { notification, checkNow };
+  const forceCheck = useCallback(() => checkNow(true), [checkNow]);
+
+  return { notification, checkNow, forceCheck };
 }

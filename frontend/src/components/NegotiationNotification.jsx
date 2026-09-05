@@ -104,7 +104,7 @@ export default function NegotiationNotification({ notification }) {
   return (
     <div
       key={notification.sessionId}
-      className={`note-settle-in fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] sm:w-full ${
+      className={`note-settle-in fixed bottom-20 left-20 z-50 w-[calc(100vw-6rem)] sm:left-64 sm:w-full ${
         expanded ? "sm:max-w-md" : "sm:max-w-sm"
       }`}
       style={{ "--note-rest-rotation": `${expanded ? rotation * 0.3 : rotation}deg` }}

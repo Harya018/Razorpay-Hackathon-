@@ -51,9 +51,17 @@ export default function Cart() {
   // Checkout sequences through cart lines ONE Razorpay order/payment
   // modal at a time — this backend creates one order per product, so a
   // literal single "pay for everything at once" order doesn't exist.
-  // Each line is removed from the cart as its payment is initiated;
-  // once the last one closes, the cart (and any pending negotiation
-  // state) is cleared.
+  // A line is only removed from the cart once its payment actually goes
+  // through; once the last one closes, the cart (and any pending
+  // negotiation state) is cleared.
+  //
+  // Bug fixed Phase 20: onClose used to fire (and this loop advanced)
+  // on a CANCELLED payment exactly the same as a completed one, so
+  // dismissing the Razorpay modal silently emptied the whole cart. It
+  // now receives `paid` and only removes the line / continues to the
+  // next one when the payment actually completed; a cancellation stops
+  // the sequence and leaves every remaining line (including the
+  // cancelled one) in the cart untouched.
   async function handleCheckoutAll() {
     setCheckingOut(true);
     setStatusMessage(null);
@@ -72,7 +80,11 @@ export default function Cart() {
           product: line.product,
           quantity: line.item.quantity,
           onStatus: setStatusMessage,
-          onClose: () => {
+          onClose: (paid) => {
+            if (!paid) {
+              setCheckingOut(false);
+              return;
+            }
             removeFromCart(line.item.productId);
             next();
           },

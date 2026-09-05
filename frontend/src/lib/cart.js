@@ -130,3 +130,14 @@ export function dismissNegotiation() {
   saveCart(cart);
   return cart;
 }
+
+// Used only by the "simulate leaving and returning" demo overlay's forced
+// re-check (useCartAbandonment's forceCheck) — lets that demo affordance
+// resurface an already-dismissed popup on demand, without touching the
+// real once-dismissed-stays-dismissed behavior for an organic abandonment.
+export function undismissNegotiation() {
+  const cart = getCart();
+  cart.negotiationDismissed = false;
+  saveCart(cart);
+  return cart;
+}

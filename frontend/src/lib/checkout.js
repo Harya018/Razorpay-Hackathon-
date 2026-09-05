@@ -9,7 +9,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // onClose (Phase 9, optional) fires once the Razorpay modal actually
 // closes — whether via a completed payment or the user dismissing it —
 // so a multi-item cart checkout can sequence through orders one at a
-// time instead of opening several payment modals at once.
+// time instead of opening several payment modals at once. It receives
+// one argument, `paid` (true/false), so a caller like Cart.jsx's
+// checkout-all loop can tell a completed payment apart from a cancelled
+// one instead of treating both as "done with this item."
 // sessionId (optional): the negotiation session that earned approvalToken,
 // if any — sent so the backend/policy-gate can confirm this token is
 // actually being redeemed for the negotiation that produced it, closing a
@@ -67,12 +70,12 @@ export async function startCheckout({ product, quantity = 1, approvalToken = nul
       } catch {
         onStatus?.("Payment made, but confirmation failed — contact support");
       }
-      onClose?.();
+      onClose?.(true);
     },
     modal: {
       ondismiss: () => {
         onStatus?.("Payment cancelled");
-        onClose?.();
+        onClose?.(false);
       },
     },
   });
