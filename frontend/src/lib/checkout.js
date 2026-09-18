@@ -1,3 +1,5 @@
+import { toastError, toastSuccess } from "./toast.js";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Shared by the plain "Buy" flow and the negotiation handoff — both end the
@@ -18,10 +20,35 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // actually being redeemed for the negotiation that produced it, closing a
 // red-team-confirmed gap where any approval_token could be redeemed
 // against an unrelated checkout for the same product/quantity.
-export async function startCheckout({ product, quantity = 1, approvalToken = null, sessionId = null, onStatus, onClose }) {
+// expectedAmount (optional, paise): what the CALLER believes the
+// negotiated total is. The backend never trusts this — it's only used
+// here, client-side, to compare against the real `amount` /order/create
+// returns. If a token silently failed re-verification (already used,
+// expired terms, session mismatch — see payments.py's
+// create_order_with_optional_discount), the backend falls through to the
+// full listed price rather than erroring, so this is the only way the
+// UI can tell the shopper "the discount didn't apply" before they pay.
+// onAuthorizationInvalid (optional): fired in exactly that case, so a
+// caller like Cart.jsx can clear its own stale negotiated-price state.
+export async function startCheckout({
+  product,
+  quantity = 1,
+  approvalToken = null,
+  sessionId = null,
+  expectedAmount = null,
+  onStatus,
+  onClose,
+  onAuthorizationInvalid,
+}) {
+  // Phase 4 (idempotency): one key per checkout attempt — the backend
+  // stores it on the Order row and returns the SAME order for a repeated
+  // request carrying it, rather than creating a second real Razorpay
+  // order. Defense-in-depth alongside the UI-level double-click guards
+  // already in Cart.jsx/ProductDetail.jsx (checkingOut state).
+  const idempotencyKey = crypto.randomUUID();
   const res = await fetch(`${API_BASE_URL}/order/create`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify({
       product_id: product.id,
       quantity,
@@ -35,7 +62,14 @@ export async function startCheckout({ product, quantity = 1, approvalToken = nul
     throw new Error(body.detail || "Failed to create order");
   }
 
-  const { razorpay_order_id, amount, key_id } = await res.json();
+  const { razorpay_order_id, amount, key_id, order_id } = await res.json();
+
+  if (expectedAmount != null && amount !== expectedAmount) {
+    const msg = "The negotiated authorization is no longer valid — you're being charged the full listed price instead.";
+    onStatus?.(msg);
+    toastError(msg);
+    onAuthorizationInvalid?.();
+  }
 
   const razorpay = new window.Razorpay({
     key: key_id,
@@ -66,11 +100,21 @@ export async function startCheckout({ product, quantity = 1, approvalToken = nul
             razorpay_signature: response.razorpay_signature,
           }),
         });
-        onStatus?.(confirmRes.ok ? "Payment successful" : "Payment made, but confirmation failed — contact support");
+        if (confirmRes.ok) {
+          onStatus?.("Payment successful");
+          toastSuccess(`Payment verified — ₹${(amount / 100).toFixed(2)} paid.`);
+          // Only after the BACKEND said the signature verified — never on
+          // Razorpay's client callback alone.
+          onClose?.(true, order_id);
+          return;
+        }
+        onStatus?.("Payment made, but confirmation failed — contact support");
+        toastError("Payment made, but signature verification failed — contact support.");
       } catch {
         onStatus?.("Payment made, but confirmation failed — contact support");
+        toastError("Payment made, but confirmation failed — contact support.");
       }
-      onClose?.(true);
+      onClose?.(true, null);
     },
     modal: {
       ondismiss: () => {

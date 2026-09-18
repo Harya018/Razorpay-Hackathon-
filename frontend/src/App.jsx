@@ -1,17 +1,34 @@
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import CatalogView from "./components/CatalogView.jsx";
 import LeaveAppOverlay from "./components/LeaveAppOverlay.jsx";
 import NegotiationNotification from "./components/NegotiationNotification.jsx";
+import RequireAdmin from "./components/RequireAdmin.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 import Sidebar from "./components/Sidebar.jsx";
+import ToastHost from "./components/ToastHost.jsx";
 import useCartAbandonment from "./hooks/useCartAbandonment.js";
 import { getCart, getCartItemCount } from "./lib/cart.js";
 import Cart from "./pages/Cart.jsx";
-import AgentConversationsPage from "./pages/dashboard/AgentConversationsPage.jsx";
-import DashboardHome from "./pages/dashboard/DashboardHome.jsx";
 import DashboardLayout from "./pages/dashboard/DashboardLayout.jsx";
-import NegotiationsPage from "./pages/dashboard/NegotiationsPage.jsx";
+import InventoryPage from "./pages/dashboard/InventoryPage.jsx";
+import MerchantOrderDetailPage from "./pages/dashboard/MerchantOrderDetailPage.jsx";
+import MerchantOrdersPage from "./pages/dashboard/MerchantOrdersPage.jsx";
+import OverviewPage from "./pages/dashboard/OverviewPage.jsx";
+import InvoicePage from "./pages/InvoicePage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import OrderDetailPage from "./pages/OrderDetailPage.jsx";
+import OrdersPage from "./pages/OrdersPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import AIAgentsPage from "./pages/dashboard/technical/AIAgentsPage.jsx";
+import AuditChainPage from "./pages/dashboard/technical/AuditChainPage.jsx";
+import LiveActivityPage from "./pages/dashboard/technical/LiveActivityPage.jsx";
+import PaymentsPage from "./pages/dashboard/technical/PaymentsPage.jsx";
+import PolicyGatePage from "./pages/dashboard/technical/PolicyGatePage.jsx";
+import SecurityPage from "./pages/dashboard/technical/SecurityPage.jsx";
+import SystemHealthPage from "./pages/dashboard/technical/SystemHealthPage.jsx";
+import TechnicalLayout from "./pages/dashboard/technical/TechnicalLayout.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import SalesAnalyticsPage from "./pages/SalesAnalyticsPage.jsx";
 import Storefront from "./pages/Storefront.jsx";
@@ -80,31 +97,71 @@ export default function App() {
           Flex row: sidebar (fixed width, icon-only below `sm`) + a
           scrollable content column that owns its own height. */}
       <div className="flex min-h-screen bg-ivory">
+        <ToastHost />
         <Sidebar cartCount={cartCount} />
         <div className="min-w-0 flex-1 overflow-x-hidden">
           <Routes>
+            {/* The site root lands on the public storefront — a first-time
+                visitor (or an interviewer opening the URL cold) should see
+                the shop, not a merchant sign-in wall. The internal catalog
+                admin view lives at /catalog. */}
+            <Route path="/" element={<Navigate to="/shop" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Customer account pages — any signed-in user; ownership is
+                enforced server-side (GET /orders/{id} returns 404 for an
+                order that isn't yours). */}
+            <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+            <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
+            <Route path="/orders/:orderId" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />
+            <Route path="/orders/:orderId/invoice" element={<RequireAuth><InvoicePage /></RequireAuth>} />
+
             <Route
-              path="/"
+              path="/catalog"
               element={
-                <div className="min-h-screen bg-ivory p-4 sm:p-6">
-                  <h1 className="font-display text-2xl font-semibold text-ink">Catalog (admin)</h1>
-                  <p className="mb-5 mt-1 font-body text-sm text-ink-soft">
-                    Internal view of Priya's Shop catalog — browse products, negotiate, or buy at the listed price.
-                  </p>
-                  <CatalogView />
-                </div>
+                <RequireAdmin>
+                  <div className="min-h-screen bg-ivory p-4 sm:p-6">
+                    <h1 className="font-display text-2xl font-semibold text-ink">Catalog (admin)</h1>
+                    <p className="mb-5 mt-1 font-body text-sm text-ink-soft">
+                      Internal view of Priya's Shop catalog — full product details, stock on hand, and a direct
+                      buy-at-list-price action.
+                    </p>
+                    <CatalogView />
+                  </div>
+                </RequireAdmin>
               }
             />
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<DashboardHome />} />
-              <Route path="negotiations" element={<NegotiationsPage />} />
-              <Route path="agent-conversations" element={<AgentConversationsPage />} />
+            {/* New information architecture: MERCHANT = Overview | Analytics
+                | Technical, all nested under /dashboard now (Analytics used
+                to be a separate top-level /analytics route — moved here so
+                the whole merchant experience lives under one gated tree,
+                per this pass's explicit IA). Technical itself nests its own
+                7 sub-pages (Live Activity, Policy Gate, AI Agents, Security,
+                Audit Chain, Payments, System Health). */}
+            <Route
+              path="/dashboard"
+              element={
+                <RequireAdmin>
+                  <DashboardLayout />
+                </RequireAdmin>
+              }
+            >
+              <Route index element={<OverviewPage />} />
+              <Route path="orders" element={<MerchantOrdersPage />} />
+              <Route path="orders/:orderId" element={<MerchantOrderDetailPage />} />
+              <Route path="inventory" element={<InventoryPage />} />
+              <Route path="profile" element={<ProfilePage merchant />} />
+              <Route path="analytics" element={<SalesAnalyticsPage />} />
+              <Route path="technical" element={<TechnicalLayout />}>
+                <Route index element={<LiveActivityPage />} />
+                <Route path="policy-gate" element={<PolicyGatePage />} />
+                <Route path="ai-agents" element={<AIAgentsPage />} />
+                <Route path="security" element={<SecurityPage />} />
+                <Route path="audit-chain" element={<AuditChainPage />} />
+                <Route path="payments" element={<PaymentsPage />} />
+                <Route path="system-health" element={<SystemHealthPage />} />
+              </Route>
             </Route>
-
-            {/* Deliberately a top-level route, NOT nested under /dashboard —
-                this is a distinct page (trends, not live events), even
-                though it shares the dashboard's visual register. */}
-            <Route path="/analytics" element={<SalesAnalyticsPage />} />
 
             <Route path="/shop" element={<ShopLayout />}>
               <Route

@@ -34,6 +34,7 @@ export default function SalesSummaryPanel({ refreshKey }) {
   // recovered-via-negotiation, human/agent split) are point-in-time
   // aggregates from /dashboard/summary with no bucketed history to draw.
   const [revenueSeries, setRevenueSeries] = useState(null);
+  const [funnel, setFunnel] = useState(null);
 
   function load() {
     fetch(`${API_BASE_URL}/dashboard/summary`)
@@ -47,7 +48,10 @@ export default function SalesSummaryPanel({ refreshKey }) {
   useEffect(() => {
     fetch(`${API_BASE_URL}/dashboard/analytics`)
       .then((res) => res.json())
-      .then((data) => setRevenueSeries((data.revenue_over_time || []).map((p) => p.revenue)))
+      .then((data) => {
+        setRevenueSeries((data.revenue_over_time || []).map((p) => p.revenue));
+        setFunnel(data.negotiation_funnel || null);
+      })
       .catch(() => {});
   }, [refreshKey]);
 
@@ -65,7 +69,7 @@ export default function SalesSummaryPanel({ refreshKey }) {
   return (
     <CardShell title="Sales Overview">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatTile label="Total orders" value={summary.total_orders} />
+        <StatTile label="Total orders" value={summary.total_orders} sub={`${summary.orders_by_status?.paid ?? 0} paid`} />
         <StatTile
           label="Total revenue"
           value={rupees(summary.total_revenue)}
@@ -82,6 +86,10 @@ export default function SalesSummaryPanel({ refreshKey }) {
           value={`${rupees(summary.channel_breakdown.human.revenue)} / ${rupees(summary.channel_breakdown.agent.revenue)}`}
           sub={`${summary.channel_breakdown.human.orders} human - ${summary.channel_breakdown.agent.orders} agent orders`}
         />
+        <StatTile label="Negotiations started" value={funnel ? funnel.sessions_started : "N/A"} />
+        <StatTile label="Negotiations approved" value={funnel ? funnel.accepted : "N/A"} accent="emerald" />
+        <StatTile label="Negotiations rejected" value={funnel ? funnel.rejected : "N/A"} />
+        <StatTile label="AI agent orders" value={summary.channel_breakdown.agent.orders} sub="paid orders via buyer-agent channel" />
       </div>
     </CardShell>
   );

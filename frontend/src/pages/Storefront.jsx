@@ -30,8 +30,29 @@ export default function Storefront() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="font-body text-sm text-ink-soft">Loading products...</p>;
-  if (error) return <p className="font-body text-sm text-rose-700">{error}</p>;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="animate-pulse overflow-hidden rounded-[3px_14px_3px_14px] border border-putty-dark bg-ivory">
+            <div className="aspect-square w-full bg-putty-light" />
+            <div className="space-y-2 p-3">
+              <div className="h-3.5 w-3/4 rounded bg-putty-light" />
+              <div className="h-3.5 w-1/2 rounded bg-putty-light" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (error) return <p className="font-body text-sm text-rose-700">Couldn't load the catalog — {error}</p>;
+  if (products.length === 0) {
+    return (
+      <p className="rounded-md border border-dashed border-putty-dark bg-ivory p-6 text-center font-body text-sm text-ink-soft">
+        No products in the catalog yet.
+      </p>
+    );
+  }
 
   const categories = ["all", ...new Set(products.map((p) => p.category).filter(Boolean))];
   const visible = category === "all" ? products : products.filter((p) => p.category === category);

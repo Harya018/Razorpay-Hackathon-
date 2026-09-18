@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { withAuthQuery } from "../lib/auth.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,7 +16,7 @@ export default function useDashboardStream(onEvent) {
   onEventRef.current = onEvent;
 
   useEffect(() => {
-    const source = new EventSource(`${API_BASE_URL}/dashboard/stream`);
+    const source = new EventSource(withAuthQuery(`${API_BASE_URL}/dashboard/stream`));
 
     source.onopen = () => setConnected(true);
     source.onerror = () => setConnected(false); // EventSource auto-reconnects on its own

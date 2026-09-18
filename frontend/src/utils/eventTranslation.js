@@ -196,6 +196,33 @@ const TRANSLATORS = {
       badge: B.good("order created"),
     };
   },
+
+  // Commerce-platform pass — see backend/app/routes/payments.py mark_order_paid
+  payment_verified(p) {
+    return { sentence: `Payment verified — ${rupees(p.amount)} (${p.razorpay_payment_id || "no payment id"}, via ${p.source}).`, badge: B.good("payment verified") };
+  },
+  payment_failed(p) {
+    return { sentence: `Payment failed for Razorpay order ${p.razorpay_order_id}.`, badge: B.bad("payment failed") };
+  },
+  order_confirmed_client_side(p) {
+    return { sentence: `Checkout callback received for payment ${p.razorpay_payment_id} — verifying signature.`, badge: B.pending("confirming") };
+  },
+  stock_deducted(p) {
+    return { sentence: `Stock deducted: −${p.quantity} on product #${p.product_id}.`, badge: B.neutral("inventory") };
+  },
+  stock_deduction_failed(p) {
+    return { sentence: `Could not deduct ${p.quantity} unit(s) of product #${p.product_id} — insufficient stock at payment time (payment already captured).`, badge: B.bad("inventory issue") };
+  },
+  order_status_updated(p) {
+    return { sentence: `Order status → ${p.to}${p.from ? ` (from ${p.from})` : ""} by ${p.actor}.`, badge: B.info("fulfillment") };
+  },
+  product_updated(p) {
+    const keys = Object.keys(p.changes || {}).join(", ");
+    return { sentence: `Product #${p.product_id} updated (${keys}) by ${p.actor}.`, badge: B.neutral("inventory") };
+  },
+  product_deleted(p) {
+    return { sentence: `Product #${p.product_id} (${p.name}) removed from the storefront by ${p.actor}.`, badge: B.bad("inventory") };
+  },
 };
 
 // Falls back to a literal, non-fabricated label for any event_type not in

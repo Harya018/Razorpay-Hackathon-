@@ -13,10 +13,11 @@ function statusBadge(session) {
   return { text: session.final_status || "closed", cls: "bg-putty-light text-ink-soft" };
 }
 
-// tall (dashboard revamp): this component now lives on its own dedicated
-// page (NegotiationsPage) instead of squeezed into a 2-column dashboard
-// grid — tall relaxes the max-height and switches to a 2-column card
-// grid on wide screens so it actually uses the extra room.
+// tall: relaxes the max-height and switches to a 2-column card grid on
+// wide screens for when this is the main content of a page rather than
+// squeezed into a dashboard grid. Rendered today on Technical → Live
+// Activity, whose refreshKey bump (on every human-channel SSE event) is
+// what keeps this list live.
 //
 // This is an audit-log surface (human negotiation sessions are
 // deterministic-graph-driven, not LLM-authored), so each session renders

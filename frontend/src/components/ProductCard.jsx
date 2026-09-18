@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 
+import { addToCart } from "../lib/cart.js";
+import { toastSuccess } from "../lib/toast.js";
+import StockBadge from "./StockBadge.jsx";
+
 export function StarRating({ rating, reviewCount, size = "text-sm" }) {
   if (rating == null) return null;
   const rounded = Math.round(rating * 2) / 2; // nearest half-star
@@ -21,6 +25,13 @@ export function StarRating({ rating, reviewCount, size = "text-sm" }) {
 export default function ProductCard({ product }) {
   const image = product.image_urls?.[0];
   const inStock = product.stock > 0;
+
+  function handleAddToCart(e) {
+    e.preventDefault(); // this whole card is a Link — don't navigate on the button click
+    e.stopPropagation();
+    addToCart(product.id, 1);
+    toastSuccess(`Added ${product.name} to cart.`);
+  }
 
   return (
     <Link
@@ -51,8 +62,16 @@ export default function ProductCard({ product }) {
         <StarRating rating={product.rating} reviewCount={product.review_count} />
         <div className="mt-auto flex items-baseline justify-between pt-1">
           <p className="font-body text-lg font-bold text-ink">₹{(product.price / 100).toFixed(2)}</p>
-          {!inStock && <span className="font-body text-xs font-medium text-rose-700">Out of stock</span>}
+          <span className="font-body text-[10px] text-ink-soft/40">#{product.id}</span>
         </div>
+        <StockBadge stock={product.stock} />
+        <button
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          className="mt-1 rounded-sm border border-clay px-3 py-1.5 font-body text-xs font-medium text-clay transition-colors hover:bg-putty-light disabled:border-putty-dark disabled:text-ink-soft/40"
+        >
+          Add to Cart
+        </button>
       </div>
     </Link>
   );

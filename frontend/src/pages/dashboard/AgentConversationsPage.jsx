@@ -60,11 +60,11 @@ export default function AgentConversationsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <h1 className="font-mono text-xl font-bold tracking-tight text-slate-100">AI Buyer Agents</h1>
+        <h1 className="font-mono text-xl font-bold tracking-tight text-ink">AI Buyer Agents</h1>
         {connected ? (
           <LiveBadge color="violet" label="Live" />
         ) : (
-          <span className="rounded-sm bg-white/10 px-2 py-0.5 font-mono text-xs font-medium text-slate-400">connecting...</span>
+          <span className="rounded-sm bg-putty-light px-2 py-0.5 font-mono text-xs font-medium text-ink-soft">connecting...</span>
         )}
       </div>
 

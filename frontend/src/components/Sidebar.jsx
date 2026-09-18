@@ -1,32 +1,32 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
-// Persistent left nav, replacing the old top tab bar — same five
-// destinations, same routes, just a different shell. Icon-only below
-// `sm` (labels hidden, not removed — still real links, still reachable)
-// rather than a hamburger/drawer: fewer moving parts, never fully hides
-// navigation, and satisfies "collapse to icons-only or a hamburger, not
-// break" without adding open/close state that has to be wired through
-// every page. On top of that responsive collapse, a manual toggle lets
-// the user collapse/expand the sidebar on any viewport; the choice is
-// remembered across reloads via localStorage.
+import useAuth from "../hooks/useAuth.js";
+import { signOut } from "../lib/auth.js";
+
+// Persistent left nav. Icon-only below `sm` (labels hidden, not removed —
+// still real links, still reachable) rather than a hamburger/drawer; a
+// manual toggle lets the user collapse/expand on any viewport, remembered
+// via localStorage.
 //
-// Shop and Cart are both nested under /shop (Cart is /shop/cart), so a
-// plain prefix-match NavLink would light up "Shop" AND "Cart" at once on
-// the cart page. isActive is computed explicitly per item instead of via
-// NavLink's own end/prefix matching so each destination highlights alone.
-const NAV_ITEMS = [
-  { to: "/shop", label: "Shop", icon: "🛍️", isActive: (p) => p === "/shop" || (p.startsWith("/shop/") && p !== "/shop/cart") },
-  { to: "/", label: "Catalog (admin)", icon: "📋", isActive: (p) => p === "/" },
-  { to: "/dashboard", label: "Merchant Dashboard", icon: "📊", isActive: (p) => p.startsWith("/dashboard") },
-  { to: "/analytics", label: "Sales Analytics", icon: "📈", isActive: (p) => p === "/analytics" },
-  { to: "/shop/cart", label: "Cart", icon: "🛒", isActive: (p) => p === "/shop/cart" },
-];
+// Role-aware: the list is built from the backend's own /auth/me answer
+// (useAuth), never from a client-side flag — hiding a merchant link from a
+// shopper is a courtesy, the backend's 403 is the actual boundary.
+// Shop and Cart are both under /shop, so isActive is explicit per item
+// rather than NavLink's prefix matching, so each highlights alone.
+const SHOP = { to: "/shop", label: "Shop", icon: "🛍️", isActive: (p) => p === "/shop" || (p.startsWith("/shop/") && p !== "/shop/cart") };
+const CART = { to: "/shop/cart", label: "Cart", icon: "🛒", isActive: (p) => p === "/shop/cart" };
+const ORDERS = { to: "/orders", label: "Your Orders", icon: "📦", isActive: (p) => p.startsWith("/orders") };
+const PROFILE = { to: "/profile", label: "Profile", icon: "👤", isActive: (p) => p === "/profile" };
+const DASHBOARD = { to: "/dashboard", label: "Merchant Dashboard", icon: "📊", isActive: (p) => p.startsWith("/dashboard") && p !== "/dashboard/profile" };
+const CATALOG = { to: "/catalog", label: "Catalog (admin)", icon: "📋", isActive: (p) => p === "/catalog" };
+const MERCHANT_PROFILE = { to: "/dashboard/profile", label: "Merchant Profile", icon: "🏪", isActive: (p) => p === "/dashboard/profile" };
 
 const STORAGE_KEY = "sidebar-collapsed";
 
 export default function Sidebar({ cartCount }) {
   const { pathname } = useLocation();
+  const { loading: authLoading, isSignedIn, isAdmin, user } = useAuth();
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem(STORAGE_KEY) === "1";
@@ -42,6 +42,8 @@ export default function Sidebar({ cartCount }) {
       // localStorage unavailable (private mode, etc.) — collapse state just won't persist.
     }
   }, [collapsed]);
+
+  const items = isAdmin ? [SHOP, CART, DASHBOARD, CATALOG, MERCHANT_PROFILE] : isSignedIn ? [SHOP, CART, ORDERS, PROFILE] : [SHOP, CART];
 
   const linkClass = (active) =>
     `flex items-center gap-3 rounded-lg px-3 py-2.5 font-body text-sm font-medium transition-colors ${
@@ -70,7 +72,7 @@ export default function Sidebar({ cartCount }) {
           {collapsed ? "»" : "«"}
         </button>
       </div>
-      {NAV_ITEMS.map((item) => (
+      {items.map((item) => (
         <NavLink key={item.to} to={item.to} className={linkClass(item.isActive(pathname))} title={item.label}>
           <span className="shrink-0 text-lg leading-none">{item.icon}</span>
           <span className={labelClass}>
@@ -79,6 +81,30 @@ export default function Sidebar({ cartCount }) {
           </span>
         </NavLink>
       ))}
+
+      <div className="mt-auto border-t border-putty-dark pt-2">
+        {authLoading ? null : isSignedIn ? (
+          <div className={collapsed ? "flex justify-center" : "px-1"}>
+            <p className={`truncate font-body text-xs text-ink-soft ${collapsed ? "hidden" : "hidden sm:block"}`} title={user?.email}>
+              {isAdmin ? "Merchant" : "Customer"} — {user?.email}
+            </p>
+            <button
+              type="button"
+              onClick={signOut}
+              title="Sign out"
+              className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 font-body text-sm font-medium text-ink-soft transition-colors hover:bg-putty-light hover:text-ink"
+            >
+              <span className="shrink-0 text-lg leading-none">🚪</span>
+              <span className={labelClass}>Sign out</span>
+            </button>
+          </div>
+        ) : (
+          <NavLink to="/login" className={linkClass(pathname === "/login")} title="Sign in">
+            <span className="shrink-0 text-lg leading-none">🔑</span>
+            <span className={labelClass}>Sign in</span>
+          </NavLink>
+        )}
+      </div>
     </nav>
   );
 }

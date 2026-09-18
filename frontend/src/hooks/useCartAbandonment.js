@@ -16,6 +16,20 @@ const CHECK_INTERVAL_MS = 5000;
 // negotiation-worthy cart is ever active in this browser at a time.
 let _negotiateStartInFlight = false;
 
+// Phase 4 (idempotency): one stable key per product, reused across
+// retries of the SAME still-unresolved negotiation attempt (network
+// hiccup, a dropped response, etc.) so a resend can't mint two live
+// sessions — the backend's /negotiate/start now de-dupes on this header.
+// Cleared once the product is actually resolved (see cart.js's
+// resolveNegotiation), so a genuinely NEW attempt later gets a fresh key.
+const _idempotencyKeys = new Map();
+function _idempotencyKeyFor(productId) {
+  if (!_idempotencyKeys.has(productId)) {
+    _idempotencyKeys.set(productId, crypto.randomUUID());
+  }
+  return _idempotencyKeys.get(productId);
+}
+
 // The real hesitation signal that replaces the old manual "Start
 // negotiation" button (removed everywhere in Phase 10 — negotiation is
 // now seller-initiated only). Runs an immediate check on mount (covers
@@ -95,12 +109,13 @@ export default function useCartAbandonment() {
     try {
       const res = await fetch(`${API_BASE_URL}/negotiate/start`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": _idempotencyKeyFor(target.productId) },
         body: JSON.stringify({ product_id: target.productId, cart_quantity: target.quantity }),
       });
       if (!res.ok) return;
       const data = await res.json();
       const proposedValue = data.proposed_offer?.value ?? null;
+      _idempotencyKeys.delete(target.productId); // resolved — a future attempt for this product is a genuinely new one
       markNegotiationTriggered(data.session_id, data.message, target.productId, proposedValue);
       setNotification({ sessionId: data.session_id, message: data.message, productId: target.productId, proposedValue });
     } catch {

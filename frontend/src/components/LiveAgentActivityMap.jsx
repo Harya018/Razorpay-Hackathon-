@@ -4,9 +4,9 @@ import CardShell from "./Card.jsx";
 // (LLM-driven, dashed violet) both talking to the Policy Gate (100%
 // deterministic, solid slate), matching docs/architecture-diagram.svg's
 // own legend exactly (slate-200/700 solid = deterministic, violet-100/600
-// dashed = LLM-driven). Edge counts start from a real baseline fetched by
-// the parent (DashboardHome) and increment live as matching events arrive
-// over the dashboard's existing SSE stream — no separate connection here.
+// dashed = LLM-driven). Edge counts are a real baseline fetched by the
+// parent from GET /dashboard/agent-activity-map (Technical → Policy Gate
+// page); this component opens no connection of its own.
 //
 // Phase 19 shell rebuild: only the OUTER card chrome changed (light card
 // instead of a dark instrument panel) — Box/Edge's own slate/violet

@@ -6,19 +6,13 @@ function tabClass({ isActive }) {
   }`;
 }
 
-// Wraps all three dashboard pages (Overview, Human Negotiations, AI Buyer
-// Agents) with a shared sub-nav tab bar — this IS the "navigation into
-// the two sub-pages" the Overview page needs, and it also lets a
-// merchant already on one sub-page jump straight to the other, not just
-// back to Overview first.
-//
-// Phase 19 shell rebuild: moved from the Phase 16 dark-slate "instrument
-// panel" shell to the same light cream/warm-brown family as the
-// storefront, per this pass's explicit direction — the whole app should
-// read as one product now, not two registers. The deterministic-vs-LLM
-// color coding and the Audit Trail panel's own terminal/mono styling are
-// UNCHANGED — this file only restyles its own shell chrome (the tab bar
-// and background), never the panels rendered inside it.
+// New information architecture: MERCHANT = Overview | Analytics |
+// Technical. Overview is the 10-second-understanding page; Analytics is
+// the trends/business-metrics page (unchanged, just moved under
+// /dashboard/analytics instead of the old top-level /analytics); Technical
+// is its own nested layout (TechnicalLayout.jsx) with 7 further sub-tabs.
+// "end" on the Overview link only — Technical's own NavLinks would
+// otherwise never highlight while nested under /dashboard/technical/*.
 export default function DashboardLayout() {
   return (
     <div className="min-h-screen bg-ivory">
@@ -30,11 +24,17 @@ export default function DashboardLayout() {
           <NavLink to="/dashboard" end className={tabClass}>
             Overview
           </NavLink>
-          <NavLink to="/dashboard/negotiations" className={tabClass}>
-            Human Negotiations
+          <NavLink to="/dashboard/orders" className={tabClass}>
+            Orders
           </NavLink>
-          <NavLink to="/dashboard/agent-conversations" className={tabClass}>
-            AI Buyer Agents
+          <NavLink to="/dashboard/inventory" className={tabClass}>
+            Inventory
+          </NavLink>
+          <NavLink to="/dashboard/analytics" className={tabClass}>
+            Analytics
+          </NavLink>
+          <NavLink to="/dashboard/technical" className={tabClass}>
+            Technical
           </NavLink>
         </div>
         <Outlet />

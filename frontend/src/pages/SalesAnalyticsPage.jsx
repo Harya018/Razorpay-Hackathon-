@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import CardShell from "../components/Card.jsx";
+import InventoryPanel from "../components/InventoryPanel.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -121,12 +122,12 @@ export default function SalesAnalyticsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-ivory p-4 sm:p-6">
-      <h1 className="mb-1 font-display text-2xl font-semibold text-ink">Sales Analytics</h1>
+    <div>
+      <h1 className="mb-1 font-display text-2xl font-semibold text-ink">Sales &amp; Agent Commerce Analytics</h1>
       {/* Framing text — unchanged wording, kept as the first line under
           the title, same as before the restyle. */}
       <p className="mb-5 font-body text-sm text-ink-soft">
-        Trends, not live events — see Merchant Dashboard for real-time activity. All figures below are computed from
+        Trends, not live events — see Overview for real-time activity. All figures below are computed from
         real order/negotiation history unless explicitly marked simulated.
       </p>
 
@@ -213,6 +214,34 @@ export default function SalesAnalyticsPage() {
               </tbody>
             </table>
           </CardShell>
+
+          <CardShell title="AI Buyer Activity" note="Autonomous buyer-agent orders vs. human orders — same channel split as revenue above.">
+            <div className="grid grid-cols-2 gap-4">
+              {data.channel_revenue_over_time.length > 0 ? (
+                <>
+                  <div>
+                    <p className="font-body text-[11px] uppercase tracking-wide text-ink-soft/70">AI-agent revenue (period)</p>
+                    <p className="font-body text-xl font-bold text-ink">
+                      ₹{data.channel_revenue_over_time.reduce((s, r) => s + (r.agent_revenue || 0), 0).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-body text-[11px] uppercase tracking-wide text-ink-soft/70">Human revenue (period)</p>
+                    <p className="font-body text-xl font-bold text-ink">
+                      ₹{data.channel_revenue_over_time.reduce((s, r) => s + (r.human_revenue || 0), 0).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <p className="font-body text-xs text-ink-soft/70">No orders in the current window yet.</p>
+              )}
+            </div>
+            <p className="mt-2 font-body text-[11px] text-ink-soft/60">
+              See Technical → AI Agents for individual buyer-agent conversations and their Policy Gate decisions.
+            </p>
+          </CardShell>
+
+          <InventoryPanel />
         </div>
       )}
     </div>

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import RecommendationsRow from "../components/RecommendationsRow.jsx";
+import StockBadge from "../components/StockBadge.jsx";
 import { clearCart, clearNegotiationAccepted, getCart, removeFromCart, updateQuantity } from "../lib/cart.js";
 import { startCheckout } from "../lib/checkout.js";
+import { toastError } from "../lib/toast.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,6 +15,8 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState(null);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [authWarning, setAuthWarning] = useState(null);
+  const [paidOrderIds, setPaidOrderIds] = useState([]);
 
   useEffect(() => {
     function refresh() {
@@ -29,7 +33,21 @@ export default function Cart() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="font-body text-sm text-ink-soft">Loading cart...</p>;
+  if (loading) {
+    return (
+      <div className="animate-pulse space-y-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 rounded-md border border-putty-dark bg-ivory p-4">
+            <div className="h-16 w-16 shrink-0 rounded-md bg-putty-light" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-3.5 w-1/2 rounded bg-putty-light" />
+              <div className="h-3.5 w-1/4 rounded bg-putty-light" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   // Phase 20: a line whose product matches an accepted negotiation
   // (NegotiationPanel's real gate-approved handoff, persisted via
@@ -40,21 +58,41 @@ export default function Cart() {
   const lines = cart.items
     .map((item) => {
       const negotiated = cart.negotiationAccepted && cart.negotiationAcceptedProductId === item.productId;
+      const product = products[item.productId];
+      const catalogLineTotal = product ? product.price * item.quantity : null;
       return {
         item,
-        product: products[item.productId],
+        product,
         negotiated,
-        lineTotal: negotiated ? cart.negotiationCheckoutAmount : products[item.productId]?.price * item.quantity,
+        catalogLineTotal,
+        lineTotal: negotiated ? cart.negotiationCheckoutAmount : catalogLineTotal,
       };
     })
     .filter((line) => line.product);
 
+  const catalogTotal = lines.reduce((sum, line) => sum + line.catalogLineTotal, 0);
   const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
+  const negotiatedDiscount = catalogTotal - subtotal;
+  const hasOutOfStock = lines.some((line) => line.product.stock <= 0);
 
   if (lines.length === 0) {
     return (
       <div className="rounded-md border border-putty-dark bg-ivory p-8 text-center">
-        <p className="font-body text-sm text-ink-soft">Your cart is empty.</p>
+        {paidOrderIds.length > 0 ? (
+          <>
+            <p className="font-body text-sm font-medium text-moss-dark">✓ Payment verified — your order is placed.</p>
+            <div className="mt-3 flex justify-center gap-3">
+              {paidOrderIds.map((id) => (
+                <Link key={id} to={`/orders/${id}`} className="rounded-sm bg-clay px-4 py-1.5 font-body text-sm font-semibold text-ivory hover:bg-clay-dark">
+                  View order ORD-{String(id).padStart(4, "0")}
+                </Link>
+              ))}
+            </div>
+            <p className="mt-2 font-body text-[11px] text-ink-soft/60">Sign in to see it under "Your Orders" — guest orders aren't tied to an account.</p>
+          </>
+        ) : (
+          <p className="font-body text-sm text-ink-soft">Your cart is empty.</p>
+        )}
         <Link to="/shop" className="mt-3 inline-block font-body text-sm font-medium text-clay hover:text-clay-dark">
           Continue shopping →
         </Link>
@@ -79,6 +117,7 @@ export default function Cart() {
   async function handleCheckoutAll() {
     setCheckingOut(true);
     setStatusMessage(null);
+    setAuthWarning(null);
     const remaining = [...lines];
 
     async function next() {
@@ -99,14 +138,23 @@ export default function Cart() {
           // means the discount actually applies here too, not only via
           // the popup's own checkout button.
           ...(line.negotiated
-            ? { approvalToken: cart.negotiationApprovalToken, sessionId: cart.negotiationAcceptedSessionId }
+            ? {
+                approvalToken: cart.negotiationApprovalToken,
+                sessionId: cart.negotiationAcceptedSessionId,
+                expectedAmount: cart.negotiationCheckoutAmount,
+                onAuthorizationInvalid: () => {
+                  setAuthWarning(`Authorization for ${line.product.name} expired — the negotiated price no longer applies. Re-negotiate for a new offer.`);
+                  clearNegotiationAccepted();
+                },
+              }
             : {}),
           onStatus: setStatusMessage,
-          onClose: (paid) => {
+          onClose: (paid, orderId) => {
             if (!paid) {
               setCheckingOut(false);
               return;
             }
+            if (orderId) setPaidOrderIds((ids) => [...ids, orderId]);
             if (line.negotiated) clearNegotiationAccepted();
             removeFromCart(line.item.productId);
             next();
@@ -114,6 +162,7 @@ export default function Cart() {
         });
       } catch (err) {
         setStatusMessage(err.message);
+        toastError(err.message);
         setCheckingOut(false);
       }
     }
@@ -129,6 +178,11 @@ export default function Cart() {
 
       {statusMessage && (
         <p className="mb-4 rounded-md bg-moss-light/20 px-3 py-2 font-body text-sm font-medium text-moss-dark">{statusMessage}</p>
+      )}
+      {authWarning && (
+        <p className="mb-4 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 font-body text-sm font-medium text-amber-800">
+          {authWarning}
+        </p>
       )}
 
       <ul className="space-y-3">
@@ -149,9 +203,16 @@ export default function Cart() {
                 {product.name}
               </Link>
               <p className="mt-0.5 font-body text-sm text-ink-soft">₹{(product.price / 100).toFixed(2)} each</p>
-              {negotiated && (
-                <p className="mt-0.5 font-body text-xs font-medium text-moss-dark">Negotiated price applied</p>
-              )}
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                <StockBadge stock={product.stock} />
+                {negotiated ? (
+                  <p className="font-body text-xs font-medium text-moss-dark">
+                    ✓ Negotiated price applied · <span className="rounded bg-moss-light/30 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide">Policy Gate: Authorized</span>
+                  </p>
+                ) : product.negotiable ? (
+                  <p className="font-body text-xs text-ink-soft/50">Negotiated price not available</p>
+                ) : null}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -191,15 +252,36 @@ export default function Cart() {
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between rounded-md border border-putty-dark bg-ivory p-4">
-        <div>
-          <p className="font-body text-xs uppercase tracking-wide text-ink-soft/60">Subtotal</p>
-          <p className="font-body text-xl font-bold text-ink">₹{(subtotal / 100).toFixed(2)}</p>
+      <div className="mt-6 rounded-md border border-putty-dark bg-ivory p-4">
+        <p className="mb-2 font-body text-[11px] font-semibold uppercase tracking-wide text-ink-soft/70">Order summary</p>
+        <div className="space-y-1.5 font-body text-sm">
+          <div className="flex justify-between">
+            <span className="text-ink-soft">Catalog total</span>
+            <span className="text-ink">₹{(catalogTotal / 100).toFixed(2)}</span>
+          </div>
+          {negotiatedDiscount > 0 && (
+            <div className="flex justify-between text-moss-dark">
+              <span>Negotiated discount</span>
+              <span>−₹{(negotiatedDiscount / 100).toFixed(2)}</span>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-putty pt-1.5 font-semibold">
+            <span className="text-ink">{negotiatedDiscount > 0 ? "Approved payable amount" : "Total"}</span>
+            <span className="text-xl text-ink">₹{(subtotal / 100).toFixed(2)}</span>
+          </div>
         </div>
+        <p className="mt-2 font-body text-[11px] text-ink-soft/60">
+          The final payable amount is set by the backend and Policy Gate — never computed or trusted from this page alone.
+        </p>
+        {hasOutOfStock && (
+          <p className="mt-2 font-body text-xs font-medium text-rose-700">
+            One or more items in your cart are out of stock — remove them to check out.
+          </p>
+        )}
         <button
           onClick={handleCheckoutAll}
-          disabled={checkingOut}
-          className="rounded-sm bg-clay px-6 py-2.5 font-body text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-clay-dark disabled:bg-putty"
+          disabled={checkingOut || hasOutOfStock}
+          className="mt-3 w-full rounded-sm bg-clay px-6 py-2.5 font-body text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-clay-dark disabled:bg-putty"
         >
           {checkingOut ? "Checking out..." : "Checkout"}
         </button>
