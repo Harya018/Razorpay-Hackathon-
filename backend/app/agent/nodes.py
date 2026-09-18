@@ -319,7 +319,7 @@ def decide_to_offer(state: NegotiationState) -> Command[Literal["propose_offer",
                 schema=DecideToOfferOutput,
             )
         except StructuredOutputError as e:
-            if not settings.DEMO_FALLBACK_MODE:
+            if not (settings.DEMO_FALLBACK_MODE or settings.DEMO_MODE):
                 raise
             # Phase 18.5 — this is the FIRST LLM call in the whole
             # negotiation graph; if every provider is down and this isn't
@@ -444,7 +444,7 @@ def propose_offer(state: NegotiationState) -> Command[Literal["handle_response",
                 }
                 candidate_message = message_proposal.message
             except StructuredOutputError as e:
-                if not settings.DEMO_FALLBACK_MODE:
+                if not (settings.DEMO_FALLBACK_MODE or settings.DEMO_MODE):
                     write_audit_log(
                         db,
                         order_id=None,
@@ -609,11 +609,35 @@ def handle_response(
         history_summary = _history_summary(new_history)
         offer_summary = _offer_summary(state["proposed_offer"])
 
-        interpretation = _call_structured(
-            system=prompts.handle_response_system(),
-            user=prompts.handle_response_user(cart_summary, history_summary, offer_summary),
-            schema=HandleResponseOutput,
-        )
+        try:
+            interpretation = _call_structured(
+                system=prompts.handle_response_system(),
+                user=prompts.handle_response_user(cart_summary, history_summary, offer_summary),
+                schema=HandleResponseOutput,
+            )
+        except StructuredOutputError as e:
+            if not (settings.DEMO_FALLBACK_MODE or settings.DEMO_MODE):
+                raise
+            # This is the highest-risk fallback gap in the graph: it's the
+            # ONE call in the negotiation loop that runs after every human
+            # reply, mid-conversation — a real demo audience member typing
+            # something and every LLM provider being down here would
+            # otherwise crash the negotiation outright. Deliberately the
+            # most conservative possible fallback: never GUESS accept or
+            # reject (either would change money-adjacent state —
+            # offer_status — on a misread), just ask the shopper to repeat
+            # themselves and stay in handle_response, exactly like a
+            # genuine off_topic reply would. No state advances; nothing
+            # here can trigger a handoff or a checkout.
+            write_audit_log(
+                db,
+                order_id=None,
+                event_type="llm_fallback_used",
+                payload={"session_id": state["session_id"], "error": str(e), "node": "handle_response"},
+            )
+            clarify_note = "Sorry, could you say that again? I want to make sure I get this right."
+            new_history_fallback = new_history + [{"role": "assistant", "content": clarify_note}]
+            return Command(update={"conversation_history": new_history_fallback}, goto="handle_response")
 
         write_audit_log(
             db,

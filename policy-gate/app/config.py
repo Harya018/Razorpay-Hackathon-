@@ -8,8 +8,8 @@ load_dotenv()
 class Settings:
     """Loads configuration from environment variables. Never hardcode secrets here."""
 
-    # Genuinely separate from the backend's DB file — this service owns its
-    # own data boundary, per the Level 2 decision on gate placement.
+    # Genuinely separate from the backend's DB file — this is the actual
+    # service boundary the architecture argues for, not cosmetic.
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./policy_gate.db")
 
     # Used to mint approval_token — must never be derivable from data a
@@ -28,6 +28,13 @@ class Settings:
     # trust boundary was silently exempting. 127.0.0.1, not localhost —
     # see README's "Known Gotchas" for why that distinction matters here.
     BACKEND_URL: str = os.getenv("BACKEND_URL", "http://127.0.0.1:8010")
+
+    # Presentation-only flag, surfaced on diagnostics — has ZERO effect on
+    # /evaluate or /verify's actual decision logic. Nothing in this
+    # service is allowed to read DEMO_MODE and change whether a discount
+    # is approved, what price is trusted, or whether a token is honored;
+    # that would defeat the entire point of this service existing.
+    DEMO_MODE: bool = os.getenv("DEMO_MODE", "0") == "1"
 
 
 settings = Settings()

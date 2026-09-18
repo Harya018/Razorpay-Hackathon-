@@ -19,3 +19,7 @@ app.include_router(shopper.router)
 @app.get("/")
 def root():
     return {"service": "buyer-agent-shopper", "status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "buyer-agent-shopper"}

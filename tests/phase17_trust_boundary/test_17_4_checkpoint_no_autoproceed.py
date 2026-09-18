@@ -33,14 +33,14 @@ import time
 
 import pytest
 
-from conftest import BACKEND_URL, BUYER_AGENT_URL, get, post
+from conftest import BACKEND_URL, BUYER_AGENT_URL, get, get_total_orders, post
 
 SILENCE_WAIT_SECONDS = 12  # a real wait, not a configured timeout (none exists) — see module docstring
 
 
 @pytest.mark.usefixtures("require_buyer_agent")
 def test_negotiate_checkpoint_does_not_auto_proceed_during_silence(evidence):
-    orders_before = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_before = get_total_orders()
 
     start_resp = post(
         f"{BUYER_AGENT_URL}/shopper/start",
@@ -62,7 +62,7 @@ def test_negotiate_checkpoint_does_not_auto_proceed_during_silence(evidence):
     evidence.record("begin_silence", wait_seconds=SILENCE_WAIT_SECONDS)
     time.sleep(SILENCE_WAIT_SECONDS)
 
-    orders_during_silence = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_during_silence = get_total_orders()
     evidence.record("orders_check_after_silence", orders_before=orders_before, orders_now=orders_during_silence)
 
     # Now actually respond — proves the checkpoint is still exactly where
@@ -98,7 +98,7 @@ def test_negotiate_checkpoint_does_not_auto_proceed_during_silence(evidence):
 
 @pytest.mark.usefixtures("require_buyer_agent")
 def test_purchase_confirmation_checkpoint_does_not_auto_proceed_during_silence(evidence):
-    orders_before = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_before = get_total_orders()
 
     start_resp = post(
         f"{BUYER_AGENT_URL}/shopper/start",
@@ -114,7 +114,7 @@ def test_purchase_confirmation_checkpoint_does_not_auto_proceed_during_silence(e
     evidence.record("begin_silence", wait_seconds=SILENCE_WAIT_SECONDS)
     time.sleep(SILENCE_WAIT_SECONDS)
 
-    orders_during_silence = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_during_silence = get_total_orders()
     evidence.record("orders_check_after_silence", orders_before=orders_before, orders_now=orders_during_silence)
 
     resume_resp = post(f"{BUYER_AGENT_URL}/shopper/chat", {"session_id": session_id, "message": "cancel"}).json()

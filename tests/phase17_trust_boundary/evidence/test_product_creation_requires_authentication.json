@@ -1,0 +1,16 @@
+{
+  "test_id": "test_product_creation_requires_authentication",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "unauthenticated_product_create",
+      "ts": 1789746676.7149477,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 401,
+      "body": {
+        "detail": "Missing or malformed Authorization header"
+      }
+    }
+  ]
+}

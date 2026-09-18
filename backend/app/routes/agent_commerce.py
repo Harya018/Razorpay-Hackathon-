@@ -419,9 +419,9 @@ def agent_pay(
 
 
 @router.get("/order/{order_id}/status", response_model=OrderStatusResponse)
-def agent_order_status(order_id: int, db: Session = Depends(get_db)):
+def agent_order_status(order_id: int, buyer: BuyerAgent = Depends(require_buyer_agent), db: Session = Depends(get_db)):
     order = db.get(Order, order_id)
-    if order is None:
+    if order is None or order.buyer_agent_id != buyer.buyer_agent_id:
         raise HTTPException(status_code=404, detail="Order not found")
     return OrderStatusResponse(
         order_id=order.id,

@@ -45,3 +45,14 @@ class AuditLogEntry(BaseModel):
     event_type: str
     payload: dict
     created_at: datetime
+    order_id: Optional[int] = None
+
+
+class NegotiationSessionStatus(BaseModel):
+    session_id: str
+    exists: bool  # False = this process has no checkpoint for this session_id at all (never existed here, or a restart since)
+    expired: bool  # True = tracked by this process but past SESSION_MAX_AGE_SECONDS
+    resumable: bool  # exists and not expired and the graph is actually paused (not already closed)
+    created_at: Optional[float] = None  # unix seconds — None if this process never tracked this session's creation
+    expires_at: Optional[float] = None
+    session_max_age_seconds: int

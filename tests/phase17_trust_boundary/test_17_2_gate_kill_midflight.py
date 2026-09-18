@@ -42,7 +42,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import BACKEND_URL, POLICY_GATE_URL, get, post
+from conftest import BACKEND_URL, POLICY_GATE_URL, get, get_total_orders, post
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 POLICY_GATE_DIR = REPO_ROOT / "policy-gate"
@@ -119,14 +119,14 @@ def test_point_a_gate_dead_before_request_fails_closed(evidence):
     time.sleep(1)
     evidence.record("gate_killed", note="policy-gate process terminated before sending any request")
 
-    orders_before = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_before = get_total_orders()
 
     # Real negotiation through the backend — its gate_client fails CLOSED
     # per gate_client.py's own contract when the gate is unreachable.
     start = post(f"{BACKEND_URL}/negotiate/start", {"product_id": 1, "cart_quantity": 1}).json()
     evidence.record("negotiate_start_with_gate_down", response=start)
 
-    orders_after = get(f"{BACKEND_URL}/dashboard/summary").json()["total_orders"]
+    orders_after = get_total_orders()
     evidence.record("orders_check", before=orders_before, after=orders_after)
 
     problems = []

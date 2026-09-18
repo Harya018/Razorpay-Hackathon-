@@ -1,0 +1,21 @@
+{
+  "test_id": "test_webhook_duplicate_event_id_is_deduplicated",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "first_delivery",
+      "ts": 1789746676.9704697,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "body": "{\"status\":\"ok\"}"
+    },
+    {
+      "label": "replayed_delivery",
+      "ts": 1789746676.9704697,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "body": "{\"status\":\"ok\",\"duplicate\":true}"
+    }
+  ]
+}

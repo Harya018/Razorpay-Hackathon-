@@ -1,0 +1,13 @@
+{
+  "test_id": "test_valid_admin_token_is_accepted",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "valid_admin_token_request",
+      "ts": 1789746676.8042383,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200
+    }
+  ]
+}

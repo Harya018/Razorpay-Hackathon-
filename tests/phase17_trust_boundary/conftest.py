@@ -13,6 +13,7 @@ of this file for the exact command).
 """
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -22,6 +23,54 @@ import requests
 BACKEND_URL = "http://127.0.0.1:8010"
 POLICY_GATE_URL = "http://127.0.0.1:8001"
 BUYER_AGENT_URL = "http://127.0.0.1:8020"
+
+
+def _load_backend_env_value(key: str) -> str:
+    """Reads one value straight out of backend/.env — the running
+    backend process loads its own env the normal way (python-dotenv on
+    import); this just lets a TEST independently know the same value
+    (e.g. to mint a token signed with the same secret the server will
+    verify it against), without importing backend application code into
+    this suite's own process.
+    """
+    env_path = Path(__file__).parent.parent.parent / "backend" / ".env"
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            if line.strip().startswith(f"{key}="):
+                return line.split("=", 1)[1].strip()
+    # No backend/.env (CI, or a checkout configured purely via real env
+    # vars) — read the same key from this process's own environment, which
+    # CI sets identically for the backend job and this suite.
+    return os.environ.get(key, "")
+
+
+def mint_admin_token(email: str | None = None) -> str | None:
+    """Mints a REAL, validly-signed (HS256) JWT using the same
+    SUPABASE_JWT_SECRET the running backend verifies against — this
+    exercises the actual signature-verification code path
+    (backend/app/auth.py's require_user/require_merchant_admin), not a
+    bypass of it. Returns None if no local SUPABASE_JWT_SECRET is
+    configured (nothing to sign with) — callers should skip rather than
+    fail in that case, since "auth isn't configured for local testing" is
+    a different condition than "auth is broken."
+    """
+    try:
+        import jwt
+    except ImportError:
+        return None
+
+    secret = _load_backend_env_value("SUPABASE_JWT_SECRET")
+    if not secret:
+        return None
+
+    admin_emails = _load_backend_env_value("MERCHANT_ADMIN_EMAILS")
+    test_email = email or (admin_emails.split(",")[0].strip() if admin_emails else "test-merchant-admin@example.com")
+
+    return jwt.encode(
+        {"sub": "test-suite-admin", "email": test_email, "app_metadata": {"role": "MERCHANT_ADMIN"}, "exp": int(time.time()) + 3600},
+        secret,
+        algorithm="HS256",
+    )
 
 EVIDENCE_DIR = Path(__file__).parent / "evidence"
 EVIDENCE_DIR.mkdir(exist_ok=True)
@@ -93,6 +142,21 @@ def pytest_runtest_makereport(item, call):
     rep = outcome.get_result()
     if rep.when == "call":
         setattr(item, "rep_call", rep)
+
+
+def get_total_orders() -> int:
+    """Phase 20 hardening made every /dashboard/* route merchant-admin-
+    gated — several pre-existing tests in this suite use
+    /dashboard/summary's total_orders purely as a convenient "did an
+    order get created" oracle (not testing dashboard auth itself), so
+    this centralizes the one auth header those call sites now need
+    instead of repeating it everywhere.
+    """
+    token = mint_admin_token()
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    resp = requests.get(f"{BACKEND_URL}/dashboard/summary", headers=headers, timeout=10)
+    resp.raise_for_status()
+    return resp.json()["total_orders"]
 
 
 def post(url, payload, **kwargs):

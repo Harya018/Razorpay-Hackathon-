@@ -7,14 +7,17 @@ shape), not shared code.
 """
 
 import json
+import logging
 import threading
 import time
-from typing import Type, TypeVar
+from typing import Optional, Type, TypeVar
 
 import openai
 from pydantic import BaseModel, ValidationError
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
@@ -56,18 +59,30 @@ def _throttle_gemini() -> None:
 
 
 def _create_completion(messages: list[dict]) -> str:
+    """Widened (Phase 10 hardening pass) from RateLimitError-only to also
+    catch a genuinely down/unreachable provider (connection error, timeout,
+    5xx) — mirrors the identical fix already made on the seller's own copy
+    of this function (backend/app/agent/nodes.py's _create_completion),
+    found there after a plain Groq outage (not a 429) crashed a live
+    negotiation with an unhandled exception instead of falling through to
+    Gemini. A malformed response or an auth/config error still surfaces
+    immediately, not silently retried against a different provider.
+    """
     providers = _get_providers()
-    last_error: Exception | None = None
-    for label, model, client in providers:
+    last_error: Optional[Exception] = None
+    for i, (label, model, client) in enumerate(providers):
         if label == "gemini-fallback":
             _throttle_gemini()
         try:
             response = client.chat.completions.create(
                 model=model, max_tokens=1024, messages=messages, response_format={"type": "json_object"}
             )
+            if i > 0:
+                logger.warning("Earlier LLM provider(s) exhausted - served by fallback provider '%s' (%s)", label, model)
             return response.choices[0].message.content
-        except openai.RateLimitError as e:
+        except (openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError, openai.InternalServerError) as e:
             last_error = e
+            logger.warning("Provider '%s' (%s) unavailable (%s), trying next if available: %s", label, model, type(e).__name__, e)
             continue
     assert last_error is not None  # unreachable with a non-empty providers list
     raise last_error

@@ -1,0 +1,21 @@
+{
+  "test_id": "test_order_create_idempotency_key_prevents_duplicate_orders",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "first_call",
+      "ts": 1789746676.6883268,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "order_id": "order_TdYV79p1ELuQRY"
+    },
+    {
+      "label": "second_call",
+      "ts": 1789746676.6893306,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "order_id": "order_TdYV79p1ELuQRY"
+    }
+  ]
+}

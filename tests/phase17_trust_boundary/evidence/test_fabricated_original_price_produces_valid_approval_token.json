@@ -5,16 +5,16 @@
   "steps": [
     {
       "label": "fetch_real_price",
-      "ts": 1788610011.417853,
-      "ts_iso": "2026-09-05T17:36:51",
+      "ts": 1789746638.3069043,
+      "ts_iso": "2026-09-18T21:20:38",
       "product_id": 1,
       "real_price_paise": 249900,
       "product_name": "Hand-Painted Ceramic Table Vase"
     },
     {
       "label": "evaluate_with_fabricated_price",
-      "ts": 1788610011.835497,
-      "ts_iso": "2026-09-05T17:36:51",
+      "ts": 1789746638.9275095,
+      "ts_iso": "2026-09-18T21:20:38",
       "request": {
         "original_price": 10000,
         "proposed_value": 9000,

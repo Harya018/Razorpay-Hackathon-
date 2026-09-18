@@ -1,0 +1,126 @@
+name: CI
+
+# Deliberately scoped: this project has no lint/formatter/type-checker
+# configured in any service (confirmed by inspection, not an oversight
+# this workflow works around), so there is nothing to run there. What
+# this DOES run:
+#   1. Backend's pure unit tests (no live services, no secrets needed) —
+#      audit hash-chain, idempotency, and auth role-derivation logic.
+#   2. Frontend production build.
+#   3. The live adversarial trust-boundary suite (tests/phase17_trust_boundary/)
+#      — the security tests that actually prove the Policy Gate can't be
+#      price-tampered, tokens can't be forged/reused, auth is enforced,
+#      etc. This job needs real (test-mode) Groq/Razorpay credentials as
+#      repo secrets to boot the four services, so it's SKIPPED — not
+#      failed — on a fork or a PR without them configured. See this
+#      repo's Settings -> Secrets to enable it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      - name: Run backend unit tests
+        working-directory: backend
+        run: python -m pytest tests/ -v
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  live-adversarial-suite:
+    runs-on: ubuntu-latest
+    # Skipped (not failed) when the repo doesn't have these secrets
+    # configured — a real Groq test-mode key and Razorpay TEST MODE keys
+    # are required to actually boot the seller/buyer negotiation agents
+    # and a real (test-mode) checkout for this suite to exercise.
+    if: ${{ vars.RUN_LIVE_ADVERSARIAL_SUITE == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      - name: Install policy-gate dependencies
+        working-directory: policy-gate
+        run: pip install -r requirements.txt
+      - name: Install buyer-agent dependencies
+        working-directory: buyer-agent
+        run: pip install -r requirements.txt
+      - name: Install trust-boundary suite dependencies
+        working-directory: tests/phase17_trust_boundary
+        run: pip install pytest requests PyJWT  # PyJWT: conftest mints a really-signed admin token
+
+      - name: Start backend and seed catalog
+        working-directory: backend
+        env:
+          DATABASE_URL: sqlite:///./app.db
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CORS_ORIGINS: http://localhost:5173
+          # Local-only auth stand-in (same as backend/.env.example) — lets the
+          # suite mint a really-signed admin token for the /dashboard/* oracle
+          # calls; not a real Supabase secret.
+          SUPABASE_JWT_SECRET: ci-only-not-a-real-supabase-secret
+          MERCHANT_ADMIN_EMAILS: test-merchant-admin@example.com
+          GATE_SECRET: ${{ secrets.GATE_SECRET }}
+          DEMO_MODE: "1"
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8010 &
+          sleep 5
+          python scripts/seed_catalog.py
+
+      - name: Start policy-gate
+        working-directory: policy-gate
+        env:
+          GATE_SECRET: ${{ secrets.GATE_SECRET }}
+          BACKEND_URL: http://127.0.0.1:8010
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8001 &
+          sleep 3
+
+      - name: Start buyer-agent
+        working-directory: buyer-agent
+        env:
+          SELLER_BASE_URL: http://127.0.0.1:8010
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          python -m uvicorn app.server:app --host 127.0.0.1 --port 8020 &
+          sleep 3
+
+      - name: Run the live trust-boundary suite
+        working-directory: tests/phase17_trust_boundary
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Must match the backend job's values above — conftest reads these
+          # from the environment when no backend/.env file exists.
+          SUPABASE_JWT_SECRET: ci-only-not-a-real-supabase-secret
+          MERCHANT_ADMIN_EMAILS: test-merchant-admin@example.com
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+        run: python -m pytest -v

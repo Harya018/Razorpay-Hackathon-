@@ -5,10 +5,10 @@
   "steps": [
     {
       "label": "shopper_start",
-      "ts": 1788610287.3767357,
-      "ts_iso": "2026-09-05T17:41:27",
+      "ts": 1789746658.900595,
+      "ts_iso": "2026-09-18T21:20:58",
       "response": {
-        "session_id": "16803444-6e94-4074-a0c8-ab0bb2f9db32",
+        "session_id": "22089a7e-4aec-458d-888a-17205405e4f2",
         "awaiting": "purchase_confirmation",
         "message": "I found Hand-Thrown Stoneware Mug at \u20b9299.00 \u2014 not negotiating on this one (no negotiation attempted). Want me to go ahead and buy it, or cancel?",
         "done": false
@@ -16,23 +16,23 @@
     },
     {
       "label": "begin_silence",
-      "ts": 1788610287.3767357,
-      "ts_iso": "2026-09-05T17:41:27",
+      "ts": 1789746658.900595,
+      "ts_iso": "2026-09-18T21:20:58",
       "wait_seconds": 12
     },
     {
       "label": "orders_check_after_silence",
-      "ts": 1788610299.4273958,
-      "ts_iso": "2026-09-05T17:41:39",
-      "orders_before": 171,
-      "orders_now": 171
+      "ts": 1789746670.938823,
+      "ts_iso": "2026-09-18T21:21:10",
+      "orders_before": 220,
+      "orders_now": 220
     },
     {
       "label": "resume_after_silence",
-      "ts": 1788610299.4366808,
-      "ts_iso": "2026-09-05T17:41:39",
+      "ts": 1789746670.9559488,
+      "ts_iso": "2026-09-18T21:21:10",
       "response": {
-        "session_id": "16803444-6e94-4074-a0c8-ab0bb2f9db32",
+        "session_id": "22089a7e-4aec-458d-888a-17205405e4f2",
         "awaiting": null,
         "message": "Shopper declined to purchase.",
         "done": true

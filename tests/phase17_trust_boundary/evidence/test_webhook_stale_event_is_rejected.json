@@ -1,0 +1,14 @@
+{
+  "test_id": "test_webhook_stale_event_is_rejected",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "stale_webhook_delivery",
+      "ts": 1789746676.9876113,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 400,
+      "body": "{\"detail\":\"Stale webhook event\"}"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "test_id": "test_dashboard_requires_authentication",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "unauthenticated_dashboard_summary",
+      "ts": 1789746676.702565,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 401,
+      "body": {
+        "detail": "Missing or malformed Authorization header"
+      }
+    }
+  ]
+}

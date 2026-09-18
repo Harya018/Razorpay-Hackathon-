@@ -9,6 +9,13 @@ class Settings:
     """Loads configuration from environment variables. Never hardcode secrets here."""
 
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+    # The deployed frontend origin — used both as the CORS allowlist
+    # default and wherever the backend needs to build a URL pointing back
+    # at the app (e.g. an OAuth-adjacent redirect). CORS_ORIGINS may hold a
+    # comma-separated list for multi-origin setups (e.g. a Vercel preview
+    # URL alongside the production one) and defaults to just FRONTEND_URL.
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", FRONTEND_URL)
 
     # Razorpay TEST mode keys only (rzp_test_...). Live keys must never be used in this codebase.
     RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "")
@@ -34,6 +41,22 @@ class Settings:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
+    # Supabase Auth (human-facing identity only — never consulted by
+    # policy-gate, never part of a discount/pricing decision). Backend
+    # verifies the JWT itself (app/auth.py) rather than trusting any
+    # frontend-supplied role. SUPABASE_JWT_SECRET (HS256, the project's
+    # legacy JWT secret from Supabase's API settings) is the fast local
+    # path; leave it blank to instead verify via Supabase's JWKS endpoint
+    # (RS256/ES256, no shared secret needed — works for newer Supabase
+    # projects using asymmetric signing keys). MERCHANT_ADMIN_EMAILS is a
+    # comma-separated allowlist promoting specific Google-login emails to
+    # MERCHANT_ADMIN when Supabase's own app_metadata.role isn't set up —
+    # the simplest way to configure "who is Priya" for a demo without
+    # needing a Supabase admin-role UI.
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+    MERCHANT_ADMIN_EMAILS: str = os.getenv("MERCHANT_ADMIN_EMAILS", "")
+
     # The policy-gate service — a separate process, called over HTTP only.
     # Never imported/called in-process; this URL is the entire coupling.
     # 127.0.0.1, not "localhost": on this dev machine, Python's `requests`
@@ -45,6 +68,18 @@ class Settings:
     # dashboard's Policy Gate Status latency panel — its honest number is
     # exactly what surfaced this.
     POLICY_GATE_URL: str = os.getenv("POLICY_GATE_URL", "http://127.0.0.1:8001")
+
+    # Shared with policy-gate (its own GATE_SECRET env var — must be the
+    # SAME value in both services' .env files). Policy-gate already uses
+    # this to mint unforgeable approval tokens; this backend's only use of
+    # it is as the X-Gate-Secret header on admin-only calls to policy-gate's
+    # POST/PUT/DELETE /rules endpoints (app/routes/admin_rules.py) — the
+    # ones that let a merchant adjust discount limits from the dashboard.
+    # Those endpoints would otherwise be reachable by anyone who can reach
+    # policy-gate's port; this is what makes them admin-only. Blank means
+    # rule-adjustment calls fail (503), same fail-closed default as an
+    # unconfigured GATE_SECRET on policy-gate's own side.
+    GATE_SECRET: str = os.getenv("GATE_SECRET", "")
 
     # Phase 11 — where redteam/ (a sibling project, its own venv, no code
     # coupling) writes its per-category JSON scorecard files
@@ -83,6 +118,31 @@ class Settings:
     # the real thing. See README.md's "Known Gotchas" and
     # demo/failure_beats/ for how this is rehearsed before a live demo.
     DEMO_FALLBACK_MODE: bool = os.getenv("DEMO_FALLBACK_MODE", "0") == "1"
+
+    # DEMO_MODE (distinct from DEMO_FALLBACK_MODE above, which is scoped
+    # narrowly to third-party-outage resilience): a broader presentation
+    # flag consulted, alongside DEMO_FALLBACK_MODE, wherever the LLM
+    # provider chain decides whether its final tier may be a deterministic
+    # templated response instead of erroring out (see the
+    # `settings.DEMO_FALLBACK_MODE or settings.DEMO_MODE` checks in
+    # app/agent/nodes.py) — and gates POST /auth/demo-login
+    # (app/routes/auth.py), a one-click sign-in for local demos with no
+    # real Supabase/Google OAuth project configured. Exactly like
+    # DEMO_FALLBACK_MODE, this NEVER touches pricing, discount approval,
+    # or payment verification — those always run for real regardless of
+    # this flag, and the demo-login token is still independently verified
+    # by the same require_user()/require_merchant_admin() path a real
+    # Supabase token goes through.
+    DEMO_MODE: bool = os.getenv("DEMO_MODE", "0") == "1"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        values = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        return values or ["http://localhost:5173"]
+
+    @property
+    def merchant_admin_emails(self) -> set[str]:
+        return {email.strip().lower() for email in self.MERCHANT_ADMIN_EMAILS.split(",") if email.strip()}
 
 
 settings = Settings()

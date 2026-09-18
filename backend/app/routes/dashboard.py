@@ -19,13 +19,14 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app import audit, gate_client
+from app.auth import require_merchant_admin
 from app.config import settings
 from app.database import SessionLocal, get_db
 from app.models.audit_log import AuditLog
 from app.models.order import Order
 from app.models.product import Product
 
-router = APIRouter(prefix="/dashboard")
+router = APIRouter(prefix="/dashboard", dependencies=[Depends(require_merchant_admin)])
 
 # Bounded scan window for feed aggregation — hackathon scale, not indexed
 # by session_id (see audit.py's own note on the same tradeoff).
@@ -629,6 +630,36 @@ def dashboard_policy_gate_status():
 # live mini architecture diagram; the frontend increments these live from
 # the existing /dashboard/stream SSE feed rather than polling this again.
 # ---------------------------------------------------------------------------
+
+
+@router.get("/llm-provider-status")
+def dashboard_llm_provider_status(db: Session = Depends(get_db)):
+    """Honest, read-only visibility into the LLM fallback chain
+    (backend/app/agent/nodes.py). "configured" only reports whether a key
+    is present in this process's env — never the key value itself, and
+    never whether that specific call is currently succeeding (this
+    backend has no per-call provider-selection tracking — see the
+    llm_fallback_used audit event below for the one thing it DOES track).
+    """
+    configured = {
+        "groq_primary": bool(settings.GROQ_API_KEY),
+        "groq_secondary": bool(settings.GROQ_API_KEY_2),
+        "gemini": bool(settings.GEMINI_API_KEY),
+    }
+    # llm_fallback_used only fires when EVERY real provider failed on a
+    # given call and a deterministic templated response was used instead
+    # (see nodes.py) — this counts real occurrences from recent audit
+    # history, not a simulated/fabricated number.
+    recent = _load_recent_payloads(db)
+    fallback_events = [r for r in recent if r["event_type"] == "llm_fallback_used"]
+    return {
+        "providers_configured": configured,
+        "demo_fallback_mode": settings.DEMO_FALLBACK_MODE,
+        "demo_mode": settings.DEMO_MODE,
+        "deterministic_fallback_used_recent_count": len(fallback_events),
+        "deterministic_fallback_last_used_at": fallback_events[0]["created_at"].isoformat() if fallback_events else None,
+        "note": "Per-call provider selection is only visible in server logs — this reflects configuration and total deterministic-fallback usage only.",
+    }
 
 
 @router.get("/agent-activity-map")

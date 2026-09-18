@@ -1,0 +1,13 @@
+{
+  "test_id": "test_agent_order_status_requires_authentication",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "unauthenticated_order_status",
+      "ts": 1789746676.8988352,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 401
+    }
+  ]
+}

@@ -9,3 +9,6 @@ langchain-core>=0.3
 openai>=1.40
 requests>=2.31
 pytest>=8.0
+alembic>=1.13
+psycopg[binary]>=3.2
+PyJWT[crypto]>=2.9

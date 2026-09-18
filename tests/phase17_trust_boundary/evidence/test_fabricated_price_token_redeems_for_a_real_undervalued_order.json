@@ -5,8 +5,8 @@
   "steps": [
     {
       "label": "evaluate_with_fabricated_price",
-      "ts": 1788610012.2031052,
-      "ts_iso": "2026-09-05T17:36:52",
+      "ts": 1789746639.7428825,
+      "ts_iso": "2026-09-18T21:20:39",
       "response": {
         "approved": false,
         "reason": "original_price_mismatch",

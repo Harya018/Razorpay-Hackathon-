@@ -1,0 +1,21 @@
+{
+  "test_id": "test_negotiate_start_idempotency_key_prevents_duplicate_sessions",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "first_call",
+      "ts": 1789746676.4673145,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "session_id": "3de2bee2-0fd9-487b-b088-7ddbd85b1c2f"
+    },
+    {
+      "label": "second_call",
+      "ts": 1789746676.4673145,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 200,
+      "session_id": "3de2bee2-0fd9-487b-b088-7ddbd85b1c2f"
+    }
+  ]
+}

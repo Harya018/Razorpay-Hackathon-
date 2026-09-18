@@ -5,24 +5,24 @@
   "steps": [
     {
       "label": "gate_killed_mid_sleep",
-      "ts": 1788609963.2891588,
-      "ts_iso": "2026-09-05T17:36:03",
+      "ts": 1789746605.1306713,
+      "ts_iso": "2026-09-18T21:20:05",
       "killed_at_offset_seconds": 4.0
     },
     {
       "label": "request_thread_result",
-      "ts": 1788609963.2891588,
-      "ts_iso": "2026-09-05T17:36:03",
+      "ts": 1789746605.1306713,
+      "ts_iso": "2026-09-18T21:20:05",
       "result": {
         "exception": "('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))"
       }
     },
     {
       "label": "backend_negotiate_with_gate_down_again",
-      "ts": 1788609979.6717362,
-      "ts_iso": "2026-09-05T17:36:19",
+      "ts": 1789746614.087442,
+      "ts_iso": "2026-09-18T21:20:14",
       "response": {
-        "session_id": "d4d1b5ec-ddc3-4e61-bfde-fbcb68c72b89",
+        "session_id": "a1b49c61-2a9d-4478-a6f2-3119f722493f",
         "message": "I'm not able to offer a discount on this right now, but I'd still love for you to grab it at the listed price.",
         "proposed_offer": null,
         "offer_status": "none",

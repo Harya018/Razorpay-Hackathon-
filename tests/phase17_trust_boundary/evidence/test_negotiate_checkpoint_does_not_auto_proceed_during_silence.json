@@ -5,34 +5,34 @@
   "steps": [
     {
       "label": "shopper_start",
-      "ts": 1788610274.2355354,
-      "ts_iso": "2026-09-05T17:41:14",
+      "ts": 1789746645.232393,
+      "ts_iso": "2026-09-18T21:20:45",
       "response": {
-        "session_id": "70734a99-7882-4449-954e-eef38c76f48d",
+        "session_id": "1bc0e40b-ef17-4983-9993-8563f4b8f367",
         "awaiting": "negotiate_checkpoint",
-        "message": "The seller's agent has come back with a 5% discount \u2014 \u20b92374.05 instead of \u20b92499.00. That's still above your budget of \u20b92000.00. Want me to keep negotiating, or should I go ahead and buy at this price?\n\nSeller agent said: \"We sell the Hand-Painted Ceramic Table Vase at \u20b92374.05. I'm happy to confirm this price\u2014let us know if you'd like to proceed with the purchase.\"",
+        "message": "The seller's agent has come back with a 5% discount \u2014 \u20b92374.05 instead of \u20b92499.00. That's still above your budget of \u20b92000.00. Want me to keep negotiating, or should I go ahead and buy at this price?\n\nSeller agent said: \"We sell the Hand-Painted Ceramic Table Vase at \u20b92374.05. I'm happy to confirm that price\u2014just let us know if you'd like to go ahead with the purchase!\"",
         "done": false
       }
     },
     {
       "label": "begin_silence",
-      "ts": 1788610274.2355354,
-      "ts_iso": "2026-09-05T17:41:14",
+      "ts": 1789746645.232393,
+      "ts_iso": "2026-09-18T21:20:45",
       "wait_seconds": 12
     },
     {
       "label": "orders_check_after_silence",
-      "ts": 1788610286.267395,
-      "ts_iso": "2026-09-05T17:41:26",
-      "orders_before": 171,
-      "orders_now": 171
+      "ts": 1789746657.2614217,
+      "ts_iso": "2026-09-18T21:20:57",
+      "orders_before": 220,
+      "orders_now": 220
     },
     {
       "label": "resume_after_silence",
-      "ts": 1788610286.285729,
-      "ts_iso": "2026-09-05T17:41:26",
+      "ts": 1789746657.2747424,
+      "ts_iso": "2026-09-18T21:20:57",
       "response": {
-        "session_id": "70734a99-7882-4449-954e-eef38c76f48d",
+        "session_id": "1bc0e40b-ef17-4983-9993-8563f4b8f367",
         "awaiting": null,
         "message": "Shopper declined to continue negotiating.",
         "done": true

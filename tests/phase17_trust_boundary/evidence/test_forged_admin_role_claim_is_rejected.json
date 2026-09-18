@@ -1,0 +1,16 @@
+{
+  "test_id": "test_forged_admin_role_claim_is_rejected",
+  "verdict": "PASS",
+  "notes": "",
+  "steps": [
+    {
+      "label": "forged_admin_token_request",
+      "ts": 1789746676.7365532,
+      "ts_iso": "2026-09-18T21:21:16",
+      "status": 401,
+      "body": {
+        "detail": "Invalid authentication token"
+      }
+    }
+  ]
+}
