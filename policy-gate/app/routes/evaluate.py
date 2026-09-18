@@ -107,6 +107,10 @@ class VerifyResponse(BaseModel):
     reason: Optional[str] = None
     final_amount: Optional[int] = None
     session_id: Optional[str] = None
+    # This service's own Approval row id — a safe cross-service reference
+    # the backend stores on the Order for traceability. It is NOT the
+    # token and grants nothing; the decision logic above is untouched.
+    approval_id: Optional[int] = None
 
 
 def _generate_token(session_id: str, product_id: int, cart_quantity: int, final_amount: int) -> str:
@@ -168,7 +172,7 @@ def evaluate(req: EvaluateRequest, db: Session = Depends(get_db)):
         # any work at all" — see test_17_2's kill-during-this-window case.
         time.sleep(_TEST_HOOK_DELAY_SECONDS)
 
-    if req.attempt_number > merchant_rules.MAX_ATTEMPTS:
+    if req.attempt_number > merchant_rules.get_max_attempts(db):
         return _record_and_respond(db, req, "rejected", reason="attempt_cap_exceeded")
 
     # WHAT_BROKE.md #9 fix: the caller's original_price is no longer taken
@@ -184,7 +188,7 @@ def evaluate(req: EvaluateRequest, db: Session = Depends(get_db)):
         return _record_and_respond(db, req, "rejected", reason="original_price_mismatch")
 
     total_original = req.original_price * req.cart_quantity
-    min_unit_price = merchant_rules.min_allowed_unit_price(req.product_id, req.original_price)
+    min_unit_price = merchant_rules.min_allowed_unit_price(db, req.product_id, req.original_price)
     min_total_allowed = min_unit_price * req.cart_quantity
 
     offer = req.proposed_offer
@@ -262,4 +266,4 @@ def verify(req: VerifyRequest, db: Session = Depends(get_db)):
     if claimed == 0:
         return VerifyResponse(valid=False, reason="token_already_used")
 
-    return VerifyResponse(valid=True, final_amount=approval.final_amount, session_id=approval.session_id)
+    return VerifyResponse(valid=True, final_amount=approval.final_amount, session_id=approval.session_id, approval_id=approval.id)

@@ -27,3 +27,10 @@ class Product(Base):
     review_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     negotiable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     reviews: Mapped[list | None] = mapped_column(JSON, nullable=True)  # list[{author, rating, text}], static seed data
+    # Soft delete: DELETE /product/{id} flips this instead of removing the
+    # row, because orders and audit rows reference product_id and must keep
+    # resolving for invoices, traces, and policy-gate's price re-check on
+    # any still-open negotiation. GET /catalog hides inactive products;
+    # GET /product/{id} still serves them (flagged) for those readers.
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    updated_at: Mapped[datetime | None] = mapped_column(nullable=True, onupdate=lambda: datetime.now(timezone.utc))

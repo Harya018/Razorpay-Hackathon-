@@ -24,6 +24,12 @@ class OrderCreateResponse(BaseModel):
     razorpay_order_id: str
     amount: int
     key_id: str
+    # This backend's own internal Order.id (distinct from razorpay_order_id)
+    # — added so the frontend's technical/lifecycle views can call
+    # GET /order/{order_id}/audit for this specific order. Purely additive;
+    # every existing consumer of this response already ignores unknown
+    # fields, so this changes nothing about the real checkout flow.
+    order_id: int
 
 
 class OrderConfirmRequest(BaseModel):

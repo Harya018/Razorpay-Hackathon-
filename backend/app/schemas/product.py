@@ -27,6 +27,21 @@ class ProductCreate(BaseModel):
     reviews: list[ReviewSchema] | None = None
 
 
+class ProductUpdate(BaseModel):
+    """PATCH body — every field optional; only what's sent is changed.
+    Price/stock keep the same integer-paise / non-negative rules as create.
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    price: int | None = Field(default=None, gt=0)
+    stock: int | None = Field(default=None, ge=0)
+    description: str | None = None
+    category: str | None = None
+    detail_description: str | None = None
+    negotiable: bool | None = None
+    is_active: bool | None = None
+
+
 class ProductResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -43,3 +58,5 @@ class ProductResponse(BaseModel):
     review_count: int | None = None
     negotiable: bool = True
     reviews: list[ReviewSchema] | None = None
+    is_active: bool = True
+    updated_at: datetime | None = None

@@ -1,18 +1,25 @@
 import json
 import logging
+import time
 import uuid
+from datetime import datetime, timezone
 from typing import Optional
 
 import razorpay
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import gate_client
 from app.audit import write_audit_log
+from app.auth import AuthUser, optional_user
 from app.config import settings
 from app.database import get_db
+from app.models.audit_log import AuditLog
 from app.models.order import Order
 from app.models.product import Product
+from app.models.webhook_event import WebhookEvent
+from app.schemas.negotiation import AuditLogEntry
 from app.schemas.order import OrderConfirmRequest, OrderCreateRequest, OrderCreateResponse
 
 router = APIRouter()
@@ -54,6 +61,8 @@ def create_order_with_optional_discount(
     channel: str = "human",
     buyer_agent_id: Optional[str] = None,
     session_id: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
+    user: Optional[AuthUser] = None,
 ) -> Order:
     """The ONE place that creates a real Razorpay order + Order row.
 
@@ -68,16 +77,27 @@ def create_order_with_optional_discount(
     channel/buyer_agent_id are attribution ONLY (Phase 6's dashboard) — they
     never affect the amount or whether a discount applies.
     """
+    if idempotency_key:
+        existing = db.query(Order).filter(Order.idempotency_key == idempotency_key).first()
+        if existing is not None:
+            return existing
+
     product = db.get(Product, product_id)
-    if product is None:
+    if product is None or not product.is_active:
         raise HTTPException(status_code=404, detail="Product not found")
 
+    # Early, honest rejection — but NOT the point of authority: stock is
+    # actually deducted atomically only when the order becomes paid (see
+    # mark_order_paid), so two concurrent checkouts that both pass this
+    # read can't both take the last unit; the second one's deduction fails
+    # and is recorded, rather than stock going negative.
     if product.stock < quantity:
         raise HTTPException(status_code=400, detail="Insufficient stock")
 
     amount = product.price * quantity
     session_id_for_audit = None
     discount_applied = False
+    approval_id = None
 
     if approval_token:
         # requester_id is None for the human channel (no buyer identity
@@ -95,6 +115,7 @@ def create_order_with_optional_discount(
             amount = verify_data["final_amount"]
             session_id_for_audit = verify_data.get("session_id")
             discount_applied = True
+            approval_id = verify_data.get("approval_id")
         else:
             write_audit_log(
                 db,
@@ -119,6 +140,13 @@ def create_order_with_optional_discount(
         amount=amount,
         status="created",
         channel=channel,
+        buyer_agent_id=buyer_agent_id,
+        idempotency_key=idempotency_key,
+        user_id=user.sub if user else None,
+        user_email=user.email if user else None,
+        quantity=quantity,
+        unit_price=product.price,
+        approval_id=approval_id,
     )
     db.add(order)
     db.commit()
@@ -132,25 +160,97 @@ def create_order_with_optional_discount(
             "session_id": session_id_for_audit,
             "channel": channel,
             "buyer_agent_id": buyer_agent_id,
+            "user_id": user.sub if user else None,
             "product_id": product.id,
             "quantity": quantity,
+            "unit_price": product.price,
+            "stock_at_creation": product.stock,
             "amount": amount,
             "discount_applied": discount_applied,
+            "approval_id": approval_id,
+            "razorpay_order_id": order.razorpay_order_id,
         },
     )
 
     return order
 
 
+FULFILLMENT_INITIAL = "placed"
+
+
+def mark_order_paid(db: Session, order: Order, razorpay_payment_id: str, source: str) -> None:
+    """The ONE place an order transitions to paid — used by both the
+    client-side /order/confirm path and the webhook path, so stock is
+    deducted exactly once per order no matter which arrives first (or
+    both). Deduction is a single atomic UPDATE guarded by `stock >= qty`,
+    so concurrent payments for the last unit can't drive stock negative:
+    the loser's UPDATE matches zero rows and is recorded as a
+    stock_deduction_failed audit event for the merchant to resolve — the
+    payment itself is already captured by Razorpay and is never silently
+    hidden. Callers must have already verified the Razorpay signature.
+    """
+    if order.status == "paid":
+        return
+    order.status = "paid"
+    order.razorpay_payment_id = razorpay_payment_id
+    order.paid_at = datetime.now(timezone.utc)
+    order.fulfillment_status = FULFILLMENT_INITIAL
+    db.commit()
+
+    deducted = (
+        db.query(Product)
+        .filter(Product.id == order.product_id, Product.stock >= order.quantity)
+        .update({Product.stock: Product.stock - order.quantity}, synchronize_session=False)
+    )
+    db.commit()
+    write_audit_log(
+        db,
+        order_id=order.id,
+        event_type="payment_verified",
+        payload={
+            "razorpay_order_id": order.razorpay_order_id,
+            "razorpay_payment_id": razorpay_payment_id,
+            "amount": order.amount,
+            "source": source,
+            "signature_verified": True,
+        },
+    )
+    write_audit_log(
+        db,
+        order_id=order.id,
+        event_type="stock_deducted" if deducted else "stock_deduction_failed",
+        payload={"product_id": order.product_id, "quantity": order.quantity, "deducted": bool(deducted)},
+    )
+    write_audit_log(
+        db,
+        order_id=order.id,
+        event_type="order_status_updated",
+        payload={"from": None, "to": FULFILLMENT_INITIAL, "actor": "system"},
+    )
+
+
 @router.post("/order/create", response_model=OrderCreateResponse)
-def create_order(payload: OrderCreateRequest, db: Session = Depends(get_db)):
+def create_order(
+    payload: OrderCreateRequest,
+    db: Session = Depends(get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    user: AuthUser | None = Depends(optional_user),
+):
     order = create_order_with_optional_discount(
-        db, payload.product_id, payload.quantity, payload.approval_token, channel="human", session_id=payload.session_id
+        db,
+        payload.product_id,
+        payload.quantity,
+        payload.approval_token,
+        channel="human",
+        session_id=payload.session_id,
+        idempotency_key=idempotency_key,
+        user=user,
     )
     return OrderCreateResponse(
         razorpay_order_id=order.razorpay_order_id,
         amount=order.amount,
         key_id=settings.RAZORPAY_KEY_ID,
+        order_id=order.id,
     )
 
 
@@ -185,9 +285,6 @@ def confirm_order(payload: OrderConfirmRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid payment signature")
 
     if order.status != "paid":
-        order.status = "paid"
-        order.razorpay_payment_id = payload.razorpay_payment_id
-        db.commit()
         write_audit_log(
             db,
             order_id=order.id,
@@ -197,8 +294,29 @@ def confirm_order(payload: OrderConfirmRequest, db: Session = Depends(get_db)):
                 "note": "Confirmed via verified checkout.js callback, not a webhook — see this endpoint's own docstring.",
             },
         )
+        mark_order_paid(db, order, payload.razorpay_payment_id, source="checkout_callback")
 
-    return {"status": order.status}
+    return {"status": order.status, "order_id": order.id}
+
+
+# Read-only, order-scoped view onto the SAME audit_logs table
+# /negotiate/{session_id}/audit already reads — this is the complement
+# for events tagged with an order_id rather than a session_id (see
+# order_created/order_confirmed_client_side above and
+# agent_payment_completed in agent_commerce.py), so a frontend
+# "Authorization Lifecycle" view can show the final payment-confirmation
+# step, which never carries a session_id in its own payload.
+@router.get("/order/{order_id}/audit", response_model=list[AuditLogEntry])
+def get_order_audit(order_id: int, db: Session = Depends(get_db)):
+    rows = db.query(AuditLog).filter(AuditLog.order_id == order_id).order_by(AuditLog.created_at, AuditLog.id).all()
+    entries = []
+    for row in rows:
+        try:
+            payload = json.loads(row.payload) if row.payload else {}
+        except (TypeError, json.JSONDecodeError):
+            continue
+        entries.append(AuditLogEntry(id=row.id, event_type=row.event_type, payload=payload, created_at=row.created_at, order_id=row.order_id))
+    return entries
 
 
 @router.post("/webhook/razorpay")
@@ -215,6 +333,17 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
 
     event = json.loads(body)
     event_type = event.get("event")
+    event_id = event.get("id") or event.get("event_id")
+    event_created_at = event.get("created_at")
+    if event_created_at and int(time.time()) - int(event_created_at) > 86400:
+        raise HTTPException(status_code=400, detail="Stale webhook event")
+    if event_id:
+        db.add(WebhookEvent(provider="razorpay", event_id=event_id, event_type=event_type))
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            return {"status": "ok", "duplicate": True}
 
     try:
         payment_entity = event["payload"]["payment"]["entity"]
@@ -224,9 +353,7 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
         order = db.query(Order).filter(Order.razorpay_order_id == razorpay_order_id).first()
         if order is not None:
             if event_type == "payment.captured":
-                order.status = "paid"
-                order.razorpay_payment_id = razorpay_payment_id
-                db.commit()
+                mark_order_paid(db, order, razorpay_payment_id, source="webhook")
             elif event_type == "payment.failed" and order.status != "paid":
                 # Red-team-confirmed gap (red-team-agent's webhook_replay.py,
                 # "Stale/out-of-order webhook replay"): Razorpay webhooks
@@ -240,6 +367,12 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
                 order.status = "failed"
                 order.razorpay_payment_id = razorpay_payment_id
                 db.commit()
+                write_audit_log(
+                    db,
+                    order_id=order.id,
+                    event_type="payment_failed",
+                    payload={"razorpay_order_id": razorpay_order_id, "razorpay_payment_id": razorpay_payment_id, "source": "webhook"},
+                )
     except Exception:
         # Never let internal processing errors block the 200 — avoids Razorpay retry pileup.
         logger.exception("Failed to process Razorpay webhook event %s", event_type)
