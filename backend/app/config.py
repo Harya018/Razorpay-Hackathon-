@@ -135,6 +135,17 @@ class Settings:
     # Supabase token goes through.
     DEMO_MODE: bool = os.getenv("DEMO_MODE", "0") == "1"
 
+    # Optional startup seed for hosts with no shell access (Render free
+    # tier): when "true", app startup runs scripts/seed_catalog.py's own
+    # seed() — but ONLY if the products table is empty. seed() is written
+    # for a one-off manual run: it resets every product's stock/price to
+    # the seed values and hard-deletes any product not in its list, so
+    # running it unconditionally on every restart would wipe real stock
+    # deductions, merchant edits, and merchant-created products. Guarding
+    # on "catalog is empty" keeps it safe to leave enabled permanently.
+    # A deliberate full re-seed remains the manual script run.
+    SEED_CATALOG_ON_STARTUP: bool = os.getenv("SEED_CATALOG_ON_STARTUP", "false").strip().lower() in ("1", "true", "yes")
+
     @property
     def cors_origins(self) -> list[str]:
         values = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
