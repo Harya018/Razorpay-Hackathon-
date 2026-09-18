@@ -1,72 +1,121 @@
+import { getSupabase, isSupabaseConfigured } from "./supabase.js";
+
+export { isSupabaseConfigured };
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8010";
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const DEMO_TOKEN_KEY = "bac_demo_access_token";
+const AUTH_CALLBACK_PATH = "/auth/callback";
 
-const TOKEN_KEY = "bac_supabase_access_token";
+// Demo sign-in is an explicit, dev-only opt-in on BOTH sides: the frontend
+// only offers it when VITE_DEMO_LOGIN=true AND no real Supabase project is
+// configured, and the backend only honors it when DEMO_MODE=1. A
+// production build with real Supabase config never shows it.
+export const isDemoLoginEnabled = () => !isSupabaseConfigured() && import.meta.env.VITE_DEMO_LOGIN === "true";
 
-export function installAuthFromUrl() {
-  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  const accessToken = hash.get("access_token");
-  if (accessToken) {
-    localStorage.setItem(TOKEN_KEY, accessToken);
-    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-  }
-}
+// --- token access (synchronous, for the fetch interceptor + SSE URL) ------
+// supabase-js owns the real session (and refreshes it); we mirror only the
+// current access token into memory via onAuthStateChange so the rest of
+// the app can read it synchronously. The demo persona uses its own key.
+let supabaseAccessToken = "";
 
 export function getAccessToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
-}
-
-// redirectTo: where to land after Google sends the user back (default:
-// the current page). The role is NOT chosen here — Supabase issues the
-// token, the backend derives SHOPPER/MERCHANT_ADMIN from it; the login
-// page only uses redirectTo to send a customer to /shop and a merchant
-// to /dashboard, and the backend's 403 is what actually stops a shopper
-// who lands on /dashboard anyway.
-export function signInWithGoogle(redirectTo) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error("Supabase frontend config is missing");
+  if (supabaseAccessToken) return supabaseAccessToken;
+  try {
+    return localStorage.getItem(DEMO_TOKEN_KEY) || "";
+  } catch {
+    return "";
   }
-  const target = window.location.origin + (redirectTo || window.location.pathname);
-  const params = new URLSearchParams({ provider: "google", redirect_to: target });
-  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?${params.toString()}`;
 }
 
-// One-click demo sign-in — calls the backend's POST /auth/demo-login,
-// which only responds when DEMO_MODE=1 is set there (see
-// backend/app/routes/auth.py). Used instead of signInWithGoogle() when no
-// real Supabase project is configured (VITE_SUPABASE_URL/ANON_KEY unset),
-// which is the normal state for a local/demo checkout of this project.
-// The token that comes back is a REAL, signed Supabase-shaped JWT —
-// verified by the backend's real require_user()/require_merchant_admin()
-// path exactly like a genuine Google-issued one, not a client-side stub.
-// role: "shopper" | "merchant" — which demo persona to mint.
-export async function signInDemo(role = "merchant", redirectTo = null) {
+// Called once before the app renders (main.jsx). With Supabase configured
+// this restores a persisted session AND — on /auth/callback — exchanges the
+// PKCE ?code= for a session, so route guards never see a false "signed
+// out" on first paint. Resolves regardless of outcome.
+export async function initAuth() {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  supabase.auth.onAuthStateChange((_event, session) => {
+    supabaseAccessToken = session?.access_token || "";
+  });
+  try {
+    const { data } = await supabase.auth.getSession();
+    supabaseAccessToken = data.session?.access_token || "";
+  } catch {
+    supabaseAccessToken = "";
+  }
+}
+
+// --- open-redirect guard ----------------------------------------------------
+// Only a same-origin absolute PATH is accepted as a post-login destination:
+// must start with a single "/", never "//" or a scheme, no backslashes.
+// Anything else falls back to the role's default landing page.
+export function safeNext(value, fallback = "/shop") {
+  if (typeof value !== "string" || value.length === 0 || value.length > 512) return fallback;
+  if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return fallback;
+  if (/[\\\r\n]/.test(value) || /^\/[a-z][a-z0-9+.-]*:/i.test(value)) return fallback;
+  return value;
+}
+
+// --- sign-in ----------------------------------------------------------------
+// Real Google sign-in through Supabase Auth (authorization code + PKCE).
+// `next` is where the user wanted to go; it only decides the landing page
+// after the callback — the ROLE is never chosen client-side. The backend
+// re-derives SHOPPER/MERCHANT_ADMIN from the verified token on every
+// request, and a non-merchant Google account landing on /dashboard simply
+// gets its 403.
+export async function signInWithGoogle(next) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error("Google sign-in isn't configured for this deployment");
+  const target = safeNext(next);
+  const redirectTo = `${window.location.origin}${AUTH_CALLBACK_PATH}?next=${encodeURIComponent(target)}`;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo, queryParams: { prompt: "select_account" } },
+  });
+  if (error) throw new Error(error.message);
+  // supabase-js navigates the browser to Google; nothing more to do here.
+}
+
+// Demo persona sign-in — see isDemoLoginEnabled. Calls the backend's
+// DEMO_MODE-gated POST /auth/demo-login, which mints a real HS256 token the
+// backend then verifies exactly like a Supabase-issued one.
+export async function signInDemo(role = "shopper", next = null) {
+  if (!isDemoLoginEnabled()) throw new Error("Demo sign-in is not enabled in this build");
   const res = await fetch(`${API_BASE_URL}/auth/demo-login?role=${encodeURIComponent(role)}`, { method: "POST" });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.detail || "Demo sign-in is not available");
   }
   const { access_token } = await res.json();
-  localStorage.setItem(TOKEN_KEY, access_token);
-  window.location.href = redirectTo || window.location.pathname;
+  localStorage.setItem(DEMO_TOKEN_KEY, access_token);
+  window.location.href = safeNext(next, role === "merchant" ? "/dashboard" : "/shop");
 }
 
-export function isSupabaseConfigured() {
-  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
-}
-
-export function signOut() {
-  localStorage.removeItem(TOKEN_KEY);
+export async function signOut() {
+  try {
+    localStorage.removeItem(DEMO_TOKEN_KEY);
+  } catch {
+    // ignore
+  }
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Local session is cleared regardless; a failed server-side revoke
+      // shouldn't trap the user in a signed-in UI.
+    }
+  }
+  supabaseAccessToken = "";
   window.location.href = "/login";
 }
 
+// --- transport --------------------------------------------------------------
 // Attach the bearer token to EVERY call to our own backend (and only our
 // backend — the URL must start with API_BASE_URL, so the token never
 // leaves for a third party). Public routes simply ignore it; routes that
-// attribute-when-present (checkout, so an order is tied to the signed-in
-// customer) and routes that require it (orders, profile, dashboard,
-// admin) all get it the same way.
+// attribute-when-present (checkout) and routes that require it (orders,
+// profile, dashboard, admin) all get it the same way.
 export function installAuthFetch() {
   const originalFetch = window.fetch.bind(window);
   window.fetch = (input, init = {}) => {
@@ -81,6 +130,8 @@ export function installAuthFetch() {
   };
 }
 
+// EventSource can't send headers — the SSE endpoint accepts the token as a
+// query param instead (backend require_user reads both).
 export function withAuthQuery(url) {
   const token = getAccessToken();
   if (!token) return url;

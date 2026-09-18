@@ -16,6 +16,7 @@ import InventoryPage from "./pages/dashboard/InventoryPage.jsx";
 import MerchantOrderDetailPage from "./pages/dashboard/MerchantOrderDetailPage.jsx";
 import MerchantOrdersPage from "./pages/dashboard/MerchantOrdersPage.jsx";
 import OverviewPage from "./pages/dashboard/OverviewPage.jsx";
+import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import InvoicePage from "./pages/InvoicePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import OrderDetailPage from "./pages/OrderDetailPage.jsx";
@@ -107,6 +108,10 @@ export default function App() {
                 admin view lives at /catalog. */}
             <Route path="/" element={<Navigate to="/shop" replace />} />
             <Route path="/login" element={<LoginPage />} />
+            {/* Supabase's post-Google redirect target (PKCE code exchange
+                already completed by initAuth() before render). Must be on
+                the Supabase project's Redirect URLs allowlist. */}
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
             {/* Customer account pages — any signed-in user; ownership is
                 enforced server-side (GET /orders/{id} returns 404 for an

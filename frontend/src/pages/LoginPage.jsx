@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 import useAuth from "../hooks/useAuth.js";
-import { isSupabaseConfigured, signInDemo, signInWithGoogle } from "../lib/auth.js";
+import { isDemoLoginEnabled, isSupabaseConfigured, safeNext, signInDemo, signInWithGoogle } from "../lib/auth.js";
 import { toastError } from "../lib/toast.js";
 
-// One authentication system (Supabase, or the DEMO_MODE stand-in), two
+// One authentication system (Supabase Google sign-in, or — in an
+// explicitly enabled dev/demo build only — the DEMO_MODE stand-in), two
 // entry points. Picking "Customer" vs "Merchant" here only decides where
 // to send the user afterwards — it never decides their ROLE. The backend
 // re-derives the role from the verified token on every request, so a
 // customer who picks "Merchant Portal" simply lands on /dashboard and is
-// shown the backend's 403 (see RequireAdmin.jsx).
+// shown the backend's 403 (see RequireAdmin.jsx). `next` is allow-listed
+// to a same-origin path (safeNext) before it is ever used.
 function Option({ title, tagline, cta, onClick, busy, accent }) {
   return (
     <div className="flex flex-1 flex-col rounded-2xl border border-putty-dark bg-white p-6 shadow-sm">
@@ -23,7 +25,7 @@ function Option({ title, tagline, cta, onClick, busy, accent }) {
           accent ? "bg-clay text-ivory hover:bg-clay-dark" : "border border-ink bg-ink text-ivory hover:bg-ink/90"
         }`}
       >
-        {busy ? "Signing in…" : cta}
+        {busy ? "Redirecting…" : cta}
       </button>
     </div>
   );
@@ -33,19 +35,21 @@ export default function LoginPage() {
   const { loading, isSignedIn, isAdmin } = useAuth();
   const [params] = useSearchParams();
   const [busy, setBusy] = useState(null);
-  const next = params.get("next");
   const supabaseReady = isSupabaseConfigured();
+  const demoReady = isDemoLoginEnabled();
+  const rawNext = params.get("next");
 
   if (!loading && isSignedIn) {
-    return <Navigate to={next || (isAdmin ? "/dashboard" : "/shop")} replace />;
+    return <Navigate to={safeNext(rawNext, isAdmin ? "/dashboard" : "/shop")} replace />;
   }
 
   async function go(role) {
-    const target = next || (role === "merchant" ? "/dashboard" : "/shop");
+    const target = safeNext(rawNext, role === "merchant" ? "/dashboard" : "/shop");
     setBusy(role);
     try {
-      if (supabaseReady) signInWithGoogle(target);
-      else await signInDemo(role, target);
+      if (supabaseReady) await signInWithGoogle(target);
+      else if (demoReady) await signInDemo(role, target);
+      else throw new Error("No sign-in method is configured — set VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY.");
     } catch (err) {
       toastError(err.message);
       setBusy(null);
@@ -73,7 +77,7 @@ export default function LoginPage() {
         <Option
           title="Merchant"
           tagline="Manage products and inventory, inspect orders, payments, Policy Gate decisions and the audit chain."
-          cta={supabaseReady ? "Merchant Portal (Google)" : "Merchant Portal"}
+          cta={supabaseReady ? "Merchant Portal — sign in with Google" : "Merchant Portal"}
           onClick={() => go("merchant")}
           busy={busy === "merchant"}
         />
@@ -81,8 +85,10 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center font-body text-[11px] text-ink-soft/60">
         {supabaseReady
-          ? "One Google sign-in for both. Your role is decided server-side from the verified token — not by which button you pressed."
-          : "Demo mode: no Google account needed. Each button signs you in as a real, server-signed demo identity; the backend still decides the role."}
+          ? "One Google sign-in for both. Your role is decided server-side from the verified token — not by which button you pressed. Merchant access requires an account the backend has configured as a merchant."
+          : demoReady
+            ? "Demo build: no Google account needed. Each button signs you in as a real, server-signed demo identity; the backend still decides the role."
+            : "Sign-in is not configured for this build."}
       </p>
     </div>
   );

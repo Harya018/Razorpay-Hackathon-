@@ -316,21 +316,31 @@ what to *show* (a login prompt vs. the dashboard), never what to *allow*.
    sign in with that Google account, the sidebar's "Sign in (merchant)"
    flow grants `MERCHANT_ADMIN` automatically — no separate admin panel
    or database row to manage for a demo.
-6. **Redirect URL for local vs. deployed:** `frontend/src/lib/auth.js`'s
-   `signInWithGoogle()` always redirects back to
-   `window.location.origin + window.location.pathname` — so it works
-   unchanged on `http://localhost:5173` locally and on your real Vercel
-   URL once deployed, with nothing to reconfigure per-environment beyond
-   the Supabase project's own **Authentication → URL Configuration →
-   Redirect URLs** allowlist (add both).
+6. **Redirect URL for local vs. deployed:** the frontend uses the
+   official `@supabase/supabase-js` client (`frontend/src/lib/supabase.js`)
+   with the **PKCE** authorization-code flow. `signInWithGoogle()` sends
+   the user to Google and asks Supabase to return them to
+   `<origin>/auth/callback?next=<path>`, where the SDK exchanges the
+   one-time `?code=` for a session (stored, and silently refreshed, by
+   the SDK) and the app then navigates to `next`. Add
+   `http://localhost:5173/auth/callback` and
+   `https://<your-vercel-app>/auth/callback` to the Supabase project's
+   **Authentication → URL Configuration → Redirect URLs** allowlist.
+   `next` is allow-listed to a same-origin path before use (no open
+   redirects), and — as everywhere else — choosing "Merchant Portal" on
+   the login page only picks the landing page; a Google account that
+   isn't in `MERCHANT_ADMIN_EMAILS` gets the backend's 403 on
+   `/dashboard`.
 
 ### Local demo sign-in (no Supabase project needed)
 
 A fresh local checkout has no Supabase project, so a real Google login
-is impossible. Set `DEMO_MODE=1` in `backend/.env` (already set in the
-example) and both the sidebar and the merchant-page gate show a single
-**Sign in (demo)** button instead of "Sign in with Google". Clicking it
-calls `POST /auth/demo-login` (`backend/app/routes/auth.py`), which
+is impossible. Set `DEMO_MODE=1` in `backend/.env` AND
+`VITE_DEMO_LOGIN=true` in `frontend/.env.local` (both already set in the
+examples; the frontend flag is ignored whenever real Supabase values are
+present) and `/login`'s two buttons become demo personas. Clicking one
+calls `POST /auth/demo-login?role=shopper|merchant`
+(`backend/app/routes/auth.py`), which
 mints a real HS256 token signed with the backend's own
 `SUPABASE_JWT_SECRET` for the first `MERCHANT_ADMIN_EMAILS` address —
 the token still goes through the exact same `require_user` /
