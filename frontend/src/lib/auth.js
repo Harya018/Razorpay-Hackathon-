@@ -46,14 +46,21 @@ export async function initAuth() {
 }
 
 // --- open-redirect guard ----------------------------------------------------
-// Only a same-origin absolute PATH is accepted as a post-login destination:
-// must start with a single "/", never "//" or a scheme, no backslashes.
-// Anything else falls back to the role's default landing page.
+// A post-login destination must be an APPROVED internal application path:
+// a single leading "/" (never "//", "/\", or a scheme), no control chars,
+// and its first segment must be one of the app's own route roots below.
+// Anything else falls back to the role's default landing page. This is an
+// allow-list, not a deny-list — an unknown path is rejected even if it is
+// same-origin.
+const APPROVED_NEXT_ROOTS = ["/shop", "/orders", "/profile", "/dashboard", "/catalog"];
+
 export function safeNext(value, fallback = "/shop") {
   if (typeof value !== "string" || value.length === 0 || value.length > 512) return fallback;
   if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return fallback;
-  if (/[\\\r\n]/.test(value) || /^\/[a-z][a-z0-9+.-]*:/i.test(value)) return fallback;
-  return value;
+  if (/[\\\r\n\x00-\x1f]/.test(value) || /^\/[a-z][a-z0-9+.-]*:/i.test(value)) return fallback;
+  const path = value.split(/[?#]/)[0];
+  const approved = APPROVED_NEXT_ROOTS.some((root) => path === root || path.startsWith(`${root}/`));
+  return approved ? value : fallback;
 }
 
 // --- sign-in ----------------------------------------------------------------
