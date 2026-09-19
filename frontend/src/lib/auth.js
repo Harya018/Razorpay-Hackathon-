@@ -5,6 +5,36 @@ export { isSupabaseConfigured };
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8010";
 const DEMO_TOKEN_KEY = "bac_demo_access_token";
 const AUTH_CALLBACK_PATH = "/auth/callback";
+// Where to send the user once sign-in completes. Kept in sessionStorage
+// (this tab only, gone when the tab closes) rather than in the OAuth
+// redirect's query string, because Supabase only honors a redirectTo that
+// matches its Redirect URLs allow-list and silently falls back to the
+// Site URL otherwise — a `?next=` on the callback URL is exactly the kind
+// of thing that fails that match and loses the destination. With the
+// destination held here, the callback URL is always the bare, fixed
+// <origin>/auth/callback.
+const DESTINATION_KEY = "bac_post_login_destination";
+
+export function rememberDestination(path) {
+  try {
+    sessionStorage.setItem(DESTINATION_KEY, safeNext(path));
+  } catch {
+    // sessionStorage unavailable — the callback will fall back to /shop.
+  }
+}
+
+// Read-once: the value is removed as soon as it's consumed so a stale
+// destination can never leak into a later, unrelated sign-in.
+export function consumeDestination(fallback = "/shop") {
+  let value = null;
+  try {
+    value = sessionStorage.getItem(DESTINATION_KEY);
+    sessionStorage.removeItem(DESTINATION_KEY);
+  } catch {
+    value = null;
+  }
+  return safeNext(value, fallback);
+}
 
 // Demo sign-in is an explicit, dev-only opt-in on BOTH sides: the frontend
 // only offers it when VITE_DEMO_LOGIN=true AND no real Supabase project is
@@ -73,8 +103,10 @@ export function safeNext(value, fallback = "/shop") {
 export async function signInWithGoogle(next) {
   const supabase = getSupabase();
   if (!supabase) throw new Error("Google sign-in isn't configured for this deployment");
-  const target = safeNext(next);
-  const redirectTo = `${window.location.origin}${AUTH_CALLBACK_PATH}?next=${encodeURIComponent(target)}`;
+  rememberDestination(next);
+  // Fixed, query-free callback — the only entry the Supabase project's
+  // Redirect URLs allow-list needs is exactly this URL.
+  const redirectTo = `${window.location.origin}${AUTH_CALLBACK_PATH}`;
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { redirectTo, queryParams: { prompt: "select_account" } },
@@ -85,7 +117,9 @@ export async function signInWithGoogle(next) {
 
 // Demo persona sign-in — see isDemoLoginEnabled. Calls the backend's
 // DEMO_MODE-gated POST /auth/demo-login, which mints a real HS256 token the
-// backend then verifies exactly like a Supabase-issued one.
+// backend then verifies exactly like a Supabase-issued one. Deliberately
+// finishes through the same /auth/callback page as the Google flow, so the
+// destination handling is one code path, exercised by every sign-in.
 export async function signInDemo(role = "shopper", next = null) {
   if (!isDemoLoginEnabled()) throw new Error("Demo sign-in is not enabled in this build");
   const res = await fetch(`${API_BASE_URL}/auth/demo-login?role=${encodeURIComponent(role)}`, { method: "POST" });
@@ -94,27 +128,46 @@ export async function signInDemo(role = "shopper", next = null) {
     throw new Error(body.detail || "Demo sign-in is not available");
   }
   const { access_token } = await res.json();
+  rememberDestination(safeNext(next, role === "merchant" ? "/dashboard" : "/shop"));
   localStorage.setItem(DEMO_TOKEN_KEY, access_token);
-  window.location.href = safeNext(next, role === "merchant" ? "/dashboard" : "/shop");
+  window.location.href = AUTH_CALLBACK_PATH;
 }
 
-export async function signOut() {
-  try {
-    localStorage.removeItem(DEMO_TOKEN_KEY);
-  } catch {
-    // ignore
-  }
-  const supabase = getSupabase();
-  if (supabase) {
+// Real sign-out. Order matters: local state is cleared FIRST so that even
+// if the network revoke fails, this browser cannot keep acting as the user.
+// supabase.auth.signOut() revokes the refresh token server-side and drops
+// the SDK's persisted session; if that call errors (offline, expired), the
+// local-scope variant is used so the persisted session is still removed.
+// Ends with a full navigation to /login, which discards every in-memory
+// React state (useAuth's cached user/role included) — nothing from the
+// previous session survives a refresh.
+let signOutInFlight = null;
+export function signOut() {
+  if (signOutInFlight) return signOutInFlight;
+  signOutInFlight = (async () => {
+    supabaseAccessToken = "";
     try {
-      await supabase.auth.signOut();
+      localStorage.removeItem(DEMO_TOKEN_KEY);
+      sessionStorage.removeItem(DESTINATION_KEY);
     } catch {
-      // Local session is cleared regardless; a failed server-side revoke
-      // shouldn't trap the user in a signed-in UI.
+      // storage unavailable — nothing to clear
     }
-  }
-  supabaseAccessToken = "";
-  window.location.href = "/login";
+    const supabase = getSupabase();
+    if (supabase) {
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) await supabase.auth.signOut({ scope: "local" });
+      } catch {
+        try {
+          await supabase.auth.signOut({ scope: "local" });
+        } catch {
+          // best effort — local storage below is still gone
+        }
+      }
+    }
+    window.location.href = "/login";
+  })();
+  return signOutInFlight;
 }
 
 // --- transport --------------------------------------------------------------

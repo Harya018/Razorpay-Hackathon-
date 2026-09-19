@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Card from "../components/Card.jsx";
+import SignOutButton from "../components/SignOutButton.jsx";
 import { Badge, ErrorBox, Field, SkeletonRows, readError } from "../components/ui.jsx";
-import { signOut } from "../lib/auth.js";
 import { toastError, toastSuccess } from "../lib/toast.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -97,9 +97,7 @@ export default function ProfilePage({ merchant = false }) {
             </p>
             <div className="mt-4 flex gap-2">
               {!merchant && <Link to="/orders" className="rounded-sm border border-clay px-3 py-1.5 font-body text-xs font-medium text-clay hover:bg-putty-light">Your orders</Link>}
-              <button onClick={signOut} className="rounded-sm border border-putty-dark px-3 py-1.5 font-body text-xs font-medium text-ink-soft hover:bg-putty-light">
-                Logout
-              </button>
+              <SignOutButton className="rounded-sm border border-putty-dark px-3 py-1.5 font-body text-xs font-medium text-ink-soft hover:bg-putty-light" />
             </div>
           </Card>
 

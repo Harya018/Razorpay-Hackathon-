@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import useAuth from "../hooks/useAuth.js";
-import { signOut } from "../lib/auth.js";
+import SignOutButton from "./SignOutButton.jsx";
 
 // Persistent left nav. Icon-only below `sm` (labels hidden, not removed —
 // still real links, still reachable) rather than a hamburger/drawer; a
@@ -88,15 +88,12 @@ export default function Sidebar({ cartCount }) {
             <p className={`truncate font-body text-xs text-ink-soft ${collapsed ? "hidden" : "hidden sm:block"}`} title={user?.email}>
               {isAdmin ? "Merchant" : "Customer"} — {user?.email}
             </p>
-            <button
-              type="button"
-              onClick={signOut}
-              title="Sign out"
+            <SignOutButton
+              showIcon
               className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 font-body text-sm font-medium text-ink-soft transition-colors hover:bg-putty-light hover:text-ink"
-            >
-              <span className="shrink-0 text-lg leading-none">🚪</span>
-              <span className={labelClass}>Sign out</span>
-            </button>
+              iconClass="shrink-0 text-lg leading-none"
+              labelClass={labelClass}
+            />
           </div>
         ) : (
           <NavLink to="/login" className={linkClass(pathname === "/login")} title="Sign in">

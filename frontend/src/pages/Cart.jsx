@@ -88,7 +88,7 @@ export default function Cart() {
                 </Link>
               ))}
             </div>
-            <p className="mt-2 font-body text-[11px] text-ink-soft/60">Sign in to see it under "Your Orders" — guest orders aren't tied to an account.</p>
+            <p className="mt-2 font-body text-[11px] text-ink-soft/60">It's also listed under "Your Orders".</p>
           </>
         ) : (
           <p className="font-body text-sm text-ink-soft">Your cart is empty.</p>

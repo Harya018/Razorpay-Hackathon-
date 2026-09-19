@@ -270,19 +270,21 @@ copy .env.local.example .env.local
 npm run dev
 ```
 
-Opens on `http://localhost:5173` — the root redirects to the public
-storefront at `/shop`. Sidebar: **Shop** (public) / **Catalog (admin)**
-at `/catalog` and **Merchant Dashboard** at `/dashboard` (both
-merchant-only, gated — see below; Analytics and the Technical Control
-Center are tabs inside the dashboard) / **Cart** (public).
+Opens on `http://localhost:5173` — the root redirects to `/shop`, which
+(like every page) requires a signed-in account; a signed-out visitor is
+sent to `/login`. Sidebar: **Shop** / **Cart** / **Your Orders** /
+**Profile** for a customer; **Merchant Dashboard** at `/dashboard`,
+**Catalog (admin)** at `/catalog` and **Merchant Profile** for the
+merchant (Analytics and the Technical Control Center are tabs inside the
+dashboard).
 
 ## Authentication setup (Supabase Auth + Google login)
 
-**Who this is for:** the merchant-only pages (Catalog admin, Merchant
-Dashboard, Sales Analytics). The storefront, cart, and checkout stay
-fully public — a shopper never needs an account. Only two roles exist:
-`SHOPPER` (the default — anyone signed in who isn't a configured
-merchant) and `MERCHANT_ADMIN`.
+**Who this is for:** everyone. Customers sign in to shop, negotiate,
+check out and see their orders (so every order is attributed to a
+verified identity); merchants sign in to reach the dashboard. Only two
+roles exist: `SHOPPER` (the default — anyone signed in who isn't a
+configured merchant) and `MERCHANT_ADMIN`.
 
 **The one thing to understand about how this is enforced:** the backend
 never trusts a role the frontend claims. Every merchant-only route
@@ -318,19 +320,26 @@ what to *show* (a login prompt vs. the dashboard), never what to *allow*.
    or database row to manage for a demo.
 6. **Redirect URL for local vs. deployed:** the frontend uses the
    official `@supabase/supabase-js` client (`frontend/src/lib/supabase.js`)
-   with the **PKCE** authorization-code flow. `signInWithGoogle()` sends
-   the user to Google and asks Supabase to return them to
-   `<origin>/auth/callback?next=<path>`, where the SDK exchanges the
-   one-time `?code=` for a session (stored, and silently refreshed, by
-   the SDK) and the app then navigates to `next`. Add
+   with the **PKCE** authorization-code flow. Before redirecting,
+   `signInWithGoogle()` stores the intended destination (`/shop` for
+   Customer, `/dashboard` for Merchant, or a guard-supplied `next`) in
+   `sessionStorage` (`bac_post_login_destination`), then asks Supabase to
+   return the user to the fixed, query-free `<origin>/auth/callback`.
+   There the SDK exchanges the one-time `?code=` for a session (stored
+   and silently refreshed by the SDK), and the app reads the stored
+   destination once, re-validates it against its route allow-list, and
+   navigates. Nothing depends on a query string surviving the OAuth round
+   trip, so the Supabase project's **Authentication → URL Configuration →
+   Redirect URLs** needs exactly two plain entries:
    `http://localhost:5173/auth/callback` and
-   `https://<your-vercel-app>/auth/callback` to the Supabase project's
-   **Authentication → URL Configuration → Redirect URLs** allowlist.
-   `next` is allow-listed to a same-origin path before use (no open
-   redirects), and — as everywhere else — choosing "Merchant Portal" on
-   the login page only picks the landing page; a Google account that
-   isn't in `MERCHANT_ADMIN_EMAILS` gets the backend's 403 on
-   `/dashboard`.
+   `https://<your-vercel-app>/auth/callback` — no wildcards. As
+   everywhere else, choosing "Merchant Portal" only picks the landing
+   page; a Google account that isn't in `MERCHANT_ADMIN_EMAILS` reaches
+   `/dashboard` and gets the backend's 403 ("Not authorized"). **Sign
+   out** calls `supabase.auth.signOut()` (server-side revoke + local
+   session removal), clears app state, and returns to `/login`; a
+   refresh of `/shop` or `/dashboard` afterwards requires signing in
+   again.
 
 ### Local demo sign-in (no Supabase project needed)
 

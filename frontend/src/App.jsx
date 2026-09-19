@@ -168,7 +168,18 @@ export default function App() {
               </Route>
             </Route>
 
-            <Route path="/shop" element={<ShopLayout />}>
+            {/* The storefront now requires a signed-in customer (any role):
+                after sign-out, refreshing /shop lands on /login rather than
+                a guest storefront, and every order is attributed to a
+                verified identity. */}
+            <Route
+              path="/shop"
+              element={
+                <RequireAuth>
+                  <ShopLayout />
+                </RequireAuth>
+              }
+            >
               <Route
                 index
                 element={
